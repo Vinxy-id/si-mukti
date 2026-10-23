@@ -10,6 +10,10 @@
   --foreground: #0B1C30;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -99,4 +103,56 @@ body {
     margin: 1.5cm;
   }
 }
+
+/* ========================================================================= */
+/* ANIMASI HALUS TAMPILAN SCROLL & DEKORATIF                                  */
+/* ========================================================================= */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Kustomisasi Scrollbar Halus Modern */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BAE6FD;
+  border-radius: 9999px;
+  border: 2px solid #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0284C7;
+}
+
 

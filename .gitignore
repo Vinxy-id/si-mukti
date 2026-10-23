@@ -50,3 +50,8 @@ __pycache__/
 
 .vercel
 .env*
+
+# Temporary snapshots
+ref_*.png
+page_*.png
+pdf_page_*.png

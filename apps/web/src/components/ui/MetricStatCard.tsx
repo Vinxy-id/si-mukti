@@ -6,7 +6,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 export interface MetricStatCardProps {
   title: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   subtitle?: string;
   icon?: React.ReactNode;
   variant?: 'default' | 'eco' | 'blue' | 'gold';
