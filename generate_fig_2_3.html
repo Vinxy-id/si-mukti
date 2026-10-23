@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gambar 2.3 UI/UX Flow SI-MUKTI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #FFFFFF;
+      width: 1560px;
+      height: 940px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .phone-mockup {
+      width: 320px;
+      height: 640px;
+      background: #FFFFFF;
+      border-radius: 40px;
+      border: 8px solid #0F172A;
+      box-shadow: 0 25px 45px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .dynamic-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 86px;
+      height: 18px;
+      background: #0F172A;
+      border-radius: 20px;
+      z-index: 50;
+    }
+    .flow-arrow {
+      color: #94A3B8;
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 12px;
+      margin-top: -60px;
+    }
+  </style>
+</head>
+<body class="p-8">
+
+  <!-- TOP HEADER -->
+  <div class="text-center mb-6">
+    <div class="flex items-center justify-center gap-2 mb-1">
+      <span class="bg-blue-100 text-blue-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Aplikasi Seluler SI-MUKTI (PWA)</span>
+      <span class="bg-emerald-100 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Metodologi User-Centered Design (UCD)</span>
+    </div>
+    <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase">
+      Rancang Bangun Pengalaman Pengguna (<span class="text-blue-700">UI/UX Flow</span>) SI-MUKTI
+    </h1>
+    
+    <!-- SUB-FLOW BREADCRUMB -->
+    <div class="flex items-center justify-center gap-3 text-sm font-semibold text-slate-500 mt-2">
+      <span class="text-slate-700 font-bold">1. Riset Etnografi</span>
+      <span>&rarr;</span>
+      <span class="text-slate-700 font-bold">2. Alur Tugas (User Flow)</span>
+      <span>&rarr;</span>
+      <span class="text-blue-600 font-extrabold bg-blue-50 px-2 py-0.5 rounded">3. Wireframe (Lo-Fi)</span>
+      <span>&rarr;</span>
+      <span class="text-blue-600 font-extrabold bg-blue-50 px-2 py-0.5 rounded">4. UI Design (Hi-Fi)</span>
+      <span>&rarr;</span>
+      <span class="text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 rounded">5. Prototipe Interaktif</span>
+    </div>
+  </div>
+
+  <!-- 4 PHONES SHOWCASE CONTAINER -->
+  <div class="flex items-center justify-center gap-6 w-full max-w-7xl px-4">
+
+    <!-- ==================== PHONE 1: WIREFRAME ==================== -->
+    <div class="flex flex-col items-center">
+      <div class="phone-mockup border-slate-400 bg-slate-50">
+        <div class="dynamic-island bg-slate-400"></div>
+        <div class="p-4 pt-10 flex flex-col h-full text-slate-400">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-slate-300 border border-slate-400 flex items-center justify-center text-xs text-slate-500 font-mono">&#9786;</div>
+              <div>
+                <div class="w-20 h-3 bg-slate-300 rounded mb-1"></div>
+                <div class="w-14 h-2 bg-slate-200 rounded"></div>
+              </div>
+            </div>
+            <div class="w-6 h-6 rounded bg-slate-200"></div>
+          </div>
+          <div class="p-3 bg-white border border-dashed border-slate-300 rounded-2xl mb-3 shadow-sm">
+            <div class="w-24 h-2.5 bg-slate-300 rounded mb-2"></div>
+            <div class="w-32 h-6 bg-slate-400 rounded mb-2"></div>
+            <div class="w-full h-8 bg-slate-200 rounded-xl flex items-center justify-center text-[10px] font-mono text-slate-500">
+              [BTN: TARIK DANA BANK]
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <div class="p-2.5 bg-white border border-slate-200 rounded-xl">
+              <div class="w-12 h-2 bg-slate-300 rounded mb-1"></div>
+              <div class="w-16 h-4 bg-slate-400 rounded"></div>
+            </div>
+            <div class="p-2.5 bg-white border border-slate-200 rounded-xl">
+              <div class="w-12 h-2 bg-slate-300 rounded mb-1"></div>
+              <div class="w-16 h-4 bg-slate-400 rounded"></div>
+            </div>
+          </div>
+          <div class="space-y-2 mb-3">
+            <div class="h-12 bg-slate-300 border border-slate-400 rounded-2xl flex items-center justify-between px-3 text-[11px] font-bold text-slate-600">
+              <span>+ SETOR LIMBAH (TAP &gt; 56dp)</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="h-11 bg-white border border-slate-300 rounded-2xl flex items-center justify-between px-3 text-[10px] text-slate-500">
+              <span>PASPOR KODE QR</span>
+              <span>&rarr;</span>
+            </div>
+          </div>
+          <div class="p-2.5 bg-slate-100 border border-slate-200 rounded-xl mt-auto">
+            <div class="w-20 h-2 bg-slate-300 rounded mb-1"></div>
+            <div class="w-full h-2 bg-slate-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs">
+          (a) Wireframe (Lo-Fi)
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1 max-w-[280px]">Arsitektur informasi, grid ergonomis, tombol ramah bengkel (&ge;56dp).</p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">&rarr;</div>
+
+    <!-- ==================== PHONE 2: REAL DASHBOARD UI ==================== -->
+    <div class="flex flex-col items-center">
+      <div class="phone-mockup border-slate-800 bg-white">
+        <div class="dynamic-island"></div>
+        <img src="pengrajin_dashboard_mobile.png" class="w-full h-full object-cover object-top pt-6" alt="Dashboard Pengrajin Real App">
+      </div>
+      <div class="text-center mt-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-100 text-blue-800 font-bold text-xs">
+          (b) UI Design (Hi-Fi)
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1 max-w-[280px]">Beranda Pengrajin (Pak Supardi), saldo valorisasi Rp 1.450.000, & telemetri.</p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">&rarr;</div>
+
+    <!-- ==================== PHONE 3: REAL ACTION AI SCAN ==================== -->
+    <div class="flex flex-col items-center">
+      <div class="phone-mockup border-slate-800 bg-slate-900">
+        <div class="dynamic-island bg-slate-800"></div>
+        <img src="pengrajin_waste_new_mobile.png" class="w-full h-full object-cover object-top pt-6" alt="Setor Residu Real App">
+      </div>
+      <div class="text-center mt-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-800 font-bold text-xs">
+          (c) UI Screen (Alur Aksi)
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1 max-w-[280px]">Pelaporan limbah, pemindaian kamera AI LiDAR volumetrik (YOLOv8-Karst).</p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">&rarr;</div>
+
+    <!-- ==================== PHONE 4: REAL PASSPORT / WALLET ==================== -->
+    <div class="flex flex-col items-center">
+      <div class="phone-mockup border-emerald-600 bg-white">
+        <div class="dynamic-island"></div>
+        <img src="pengrajin_passports_mobile.png" class="w-full h-full object-cover object-top pt-6" alt="Paspor Produk Real App">
+      </div>
+      <div class="text-center mt-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs">
+          (d) Interactive Prototype
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1 max-w-[280px]">Katalog paspor produk aktif terverifikasi (PAS-TA-2026) & cetak kode QR.</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

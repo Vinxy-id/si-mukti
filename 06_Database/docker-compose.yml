@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: simukti_postgis
+    restart: always
+    environment:
+      POSTGRES_DB: simukti_db
+      POSTGRES_USER: simukti_user
+      POSTGRES_PASSWORD: simukti_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./01_schema_postgis.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./02_views_and_functions.sql:/docker-entrypoint-initdb.d/02_views.sql:ro
+      - ./03_seed_data.sql:/docker-entrypoint-initdb.d/03_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U simukti_user -d simukti_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: simukti_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@simukti.tulungagung.go.id
+      PGADMIN_DEFAULT_PASSWORD: admin_simukti_2026
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

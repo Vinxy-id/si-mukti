@@ -1,0 +1,26 @@
+{
+  "name": "si-mukti-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistem Informasi Manajemen Spasial dan Rantai Pasok Marmer Tulungagung (SI-MUKTI)",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "pnpm --filter @si-mukti/database test && pnpm --filter @si-mukti/api test && pnpm --filter @si-mukti/web test",
+    "test:db": "pnpm --filter @si-mukti/database test",
+    "test:api": "pnpm --filter @si-mukti/api test",
+    "test:web": "pnpm --filter @si-mukti/web test",
+    "dev": "pnpm --filter @si-mukti/web dev",
+    "dev:web": "pnpm --filter @si-mukti/web dev",
+    "start:api": "pnpm --filter @si-mukti/api start:dev",
+    "db:generate": "pnpm --filter @si-mukti/database db:generate",
+    "db:migrate": "pnpm --filter @si-mukti/database db:migrate",
+    "db:seed": "pnpm --filter @si-mukti/database db:seed",
+    "build": "pnpm --recursive run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

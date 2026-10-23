@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>SI-MUKTI TRACE: Paspor Digital & Verifikasi Keaslian Marmer (PRD & DB Connected)</title>
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SI-MUKTI Database & API Client -->
+  <script src="simukti_client.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00236F",
+            "primary-container": "#1E3A8A",
+            secondary: "#006C49",
+            "secondary-container": "#6CF8BB",
+            "on-secondary-container": "#00714D",
+            "surface-canvas": "#F8FAFC",
+            "surface-card": "#FFFFFF",
+            "surface-muted": "#F1F5F9",
+            "border-subtle": "#E2E8F0",
+            "text-primary": "#0B1C30",
+            "text-muted": "#64748B",
+            gold: "#D97706"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            tabular: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8FAFC;
+      color: #0B1C30;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 16px -2px rgba(0, 35, 111, 0.07), 0 2px 6px -2px rgba(0, 35, 111, 0.04);
+    }
+    .gold-seal-glow {
+      box-shadow: 0 0 20px rgba(217, 119, 6, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-secondary-container selection:text-on-secondary-container pb-12">
+
+  <!-- ================= TOP VERIFICATION BANNER ================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border-subtle shadow-sm w-full">
+    <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gold/15 text-gold border border-gold/30 flex items-center justify-center font-bold text-lg">
+          🏛️
+        </div>
+        <div>
+          <div class="flex items-center gap-1">
+            <span class="text-sm font-extrabold text-primary tracking-tight">SI-MUKTI TRACE</span>
+            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-secondary border border-emerald-300">Resmi Pemkab</span>
+          </div>
+          <p class="text-[10px] text-text-muted">Paspor Digital Keaslian Marmer Tulungagung</p>
+        </div>
+      </div>
+
+      <button onclick="openModal('modal-qr')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-primary rounded-lg text-xs font-bold border border-border-subtle flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-base">qr_code_2</span>
+        <span>Kode QR</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= DEMO PRODUCT SELECTOR (FROM DB) ================= -->
+  <div class="bg-slate-100 border-b border-border-subtle py-2">
+    <div class="max-w-md mx-auto px-4 flex items-center justify-between text-xs">
+      <span class="text-[11px] text-text-muted font-bold flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm text-primary">touch_app</span>
+        Pilih Paspor dari Database:
+      </span>
+      <select id="select-demo-product" onchange="gantiPaspor(this.value)" class="bg-white border border-border-subtle text-primary font-bold text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-primary shadow-xs">
+        <option value="09841-f8a4e32d-98bc-4122-8d99-7f32a00192ea">Meja Bundar Solid Onyx (Pak Supardi)</option>
+        <option value="09842-c12e87ab-43dd-4519-91aa-5b23d90211fc">Wastafel Marmer Trosobo (Pak Supardi)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ================= MAIN VERIFICATION CANVAS ================= -->
+  <main class="w-full max-w-md mx-auto px-4 pt-4 flex flex-col gap-4">
+
+    <!-- HERO VERIFICATION BADGE CARD (FR-15) -->
+    <section class="bg-white rounded-3xl p-5 border-2 border-emerald-500 card-shadow gold-seal-glow relative overflow-hidden flex flex-col gap-3">
+      <div class="absolute -right-6 -bottom-6 text-9xl text-emerald-500/5 select-none pointer-events-none">🏛️</div>
+
+      <div class="flex items-center justify-between">
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-100 text-secondary border border-emerald-300 text-xs font-extrabold shadow-xs">
+          <span class="material-symbols-outlined text-sm font-extrabold" style="font-variation-settings: 'FILL' 1;">verified</span>
+          PRODUK TERVERIFIKASI ASLI - 100% MARMER TULUNGAGUNG
+        </span>
+        <span class="text-[11px] font-mono text-text-muted">SNI 03-0394</span>
+      </div>
+
+      <div>
+        <h2 id="p-title" class="text-xl font-extrabold text-primary leading-tight">Memuat karya...</h2>
+        <p id="p-category" class="text-xs text-text-muted mt-0.5">Memuat kategori...</p>
+      </div>
+
+      <div class="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] text-text-muted">Nomor Registrasi Sertifikat Resmi:</span>
+          <p id="p-reg" class="text-xs font-mono font-extrabold text-primary">REG-PEMKAB-TA/2026/09841</p>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-text-muted">Status:</span>
+          <p class="text-xs font-bold text-secondary">Tersertifikasi Geologis</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT PHOTO & SPECIFICATIONS -->
+    <section class="bg-white rounded-2xl overflow-hidden border border-border-subtle card-shadow flex flex-col">
+      <div class="relative w-full h-56 bg-slate-900">
+        <img id="p-img" class="w-full h-full object-cover" alt="Foto Karya Marmer" src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80"/>
+        
+        <div class="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-xl text-white text-xs flex items-center gap-2 border border-white/20">
+          <span class="material-symbols-outlined text-amber-400 text-base">terrain</span>
+          <div>
+            <div class="text-[9px] text-slate-300">Asal Kuari Tambang:</div>
+            <div id="p-quarry" class="font-bold">Kuari Selatan Besole Blok 4</div>
+          </div>
+        </div>
+
+        <div class="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[10px] font-bold flex items-center gap-1 shadow-md border border-emerald-400">
+          <span class="material-symbols-outlined text-xs">recycling</span>
+          <span>100% Zero-Waste</span>
+        </div>
+      </div>
+
+      <div class="p-4 grid grid-cols-3 gap-2 text-center bg-slate-50 border-t border-border-subtle text-xs">
+        <div class="p-2 bg-white rounded-xl border border-border-subtle">
+          <span class="text-[10px] text-text-muted">Bobot Netto</span>
+          <p id="p-weight" class="font-extrabold text-primary font-tabular mt-0.5">185 kg</p>
+        </div>
+        <div class="p-2 bg-white rounded-xl border border-border-subtle">
+          <span class="text-[10px] text-text-muted">Varietas Batu</span>
+          <p id="p-variety" class="font-bold text-primary truncate mt-0.5">Kalsit Onyx</p>
+        </div>
+        <div class="p-2 bg-white rounded-xl border border-border-subtle">
+          <span class="text-[10px] text-text-muted">Residu Terserap</span>
+          <p id="p-recycled" class="font-extrabold text-secondary font-tabular mt-0.5">100%</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFIL PENGRAJIN LOKAL (ARTISAN) -->
+    <section class="bg-white rounded-2xl p-4 border border-border-subtle card-shadow flex flex-col gap-3">
+      <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider">Profil Pengrajin Lokal Pembuat Karya</h3>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary shadow-xs shrink-0">
+            <img id="p-artisan-img" class="w-full h-full object-cover" alt="Artisan" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=200&q=80"/>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h4 id="p-artisan-name" class="text-sm font-extrabold text-primary">Pak Supardi</h4>
+              <span class="material-symbols-outlined text-secondary text-base" style="font-variation-settings: 'FILL' 1;">verified</span>
+            </div>
+            <p id="p-artisan-shop" class="text-xs text-text-muted">Bengkel Marmer Al-Barokah, Campurdarat</p>
+            <p class="text-[11px] text-secondary font-semibold">Pengalaman 28 tahun seni ukir & bubut batu alam</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+        <span class="text-[11px] text-text-muted">ID Paguyuban: <strong class="font-mono text-primary">PGY-CD-001</strong></span>
+        <button onclick="hubungiPengrajin()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-secondary border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors">
+          <span class="material-symbols-outlined text-base">chat</span>
+          <span>Pesan Kustom (WhatsApp)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- HASIL UJI SPEKTROMETRI SNI VS SINTETIS TIRUAN -->
+    <section class="bg-white rounded-2xl p-4 border border-border-subtle card-shadow flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-secondary">science</span>
+          Uji Mutu Laboratorium Geologi
+        </h3>
+        <span class="text-[10px] font-bold text-secondary bg-emerald-100 px-2 py-0.5 rounded-full">Lolos SNI Super</span>
+      </div>
+
+      <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-xl text-xs font-bold text-center">
+        <button id="btn-spek-alami" onclick="switchSpekTab('alami')" class="py-1.5 rounded-lg bg-white text-primary shadow-xs">
+          Marmer Asli Tulungagung
+        </button>
+        <button id="btn-spek-sintetis" onclick="switchSpekTab('sintetis')" class="py-1.5 rounded-lg text-text-muted hover:text-primary">
+          Marmer Resin Sintetis (Tiruan)
+        </button>
+      </div>
+
+      <div id="spek-tab-alami" class="space-y-2 text-xs">
+        <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="text-text-muted">Kadar Kalsium Karbonat (CaCO3):</span>
+            <strong id="p-caco3" class="text-sm font-extrabold text-secondary font-tabular">98.40%</strong>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div id="p-caco3-bar" class="bg-secondary h-full rounded-full" style="width: 98.4%;"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-border-subtle">
+            <span class="text-text-muted">Struktur Kristal:</span>
+            <p class="font-bold text-primary mt-0.5">Kalsit Alami Tembus Cahaya (Translucent)</p>
+          </div>
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-border-subtle">
+            <span class="text-text-muted">Ketahanan Suhu:</span>
+            <p class="font-bold text-primary mt-0.5">Tahan Panas &gt; 800°C (Non-Flammable)</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="spek-tab-sintetis" class="space-y-2 text-xs hidden">
+        <div class="p-3 bg-red-50/70 rounded-xl border border-red-200 space-y-1 text-red-900">
+          <div class="flex items-center gap-1.5 font-bold">
+            <span class="material-symbols-outlined text-base text-red-600">warning</span>
+            <span>Ciri Marmer Sintetis / Komposit Tiruan:</span>
+          </div>
+          <p class="text-[11px] leading-relaxed">
+            Dibuat dari campuran serbuk kalsium murah dengan <strong>15–25% resin polyester kimia</strong>. Tidak memiliki serat kristal geologis alami.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-border-subtle">
+            <span class="text-text-muted">Reaksi Suhu:</span>
+            <p class="font-bold text-red-600 mt-0.5">Melepuh / menguning pada suhu &gt; 120°C</p>
+          </div>
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-border-subtle">
+            <span class="text-text-muted">Kerapuhan Permukaan:</span>
+            <p class="font-bold text-red-600 mt-0.5">Mudah tergores dan pudar</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LINIMASA KETERTELUSURAN DARI DATABASE (TRACEABILITY TIMELINE) -->
+    <section class="bg-white rounded-2xl p-4 border border-border-subtle card-shadow flex flex-col gap-3">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+        <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-secondary">timeline</span>
+          Linimasa Perjalanan Rantai Pasok (simukti.db)
+        </h3>
+        <span class="text-[10px] font-mono text-text-muted">Tervalidasi Digital</span>
+      </div>
+
+      <div id="timeline-container" class="relative pl-6 space-y-4 pt-2 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+        <!-- Rendered by JS from DB -->
+      </div>
+    </section>
+
+    <!-- ACTION BUTTONS: Download e-Passport PDF & WhatsApp -->
+    <section class="flex flex-col gap-2 pt-1 pb-4">
+      <button onclick="unduhPassportPDF()" class="tap-target w-full bg-primary hover:bg-navy text-white font-bold text-xs rounded-xl py-3.5 flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all">
+        <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+        <span>Unduh e-Passport Resmi (Sertifikat PDF)</span>
+      </button>
+
+      <button onclick="hubungiPengrajin()" class="tap-target w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl py-3 flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all">
+        <span class="material-symbols-outlined text-lg">chat</span>
+        <span>Hubungi Pengrajin via WhatsApp</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL: KODE QR STIKER FISIK ================= -->
+  <div id="modal-qr" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 text-center border border-border-subtle">
+      <div class="w-12 h-12 rounded-2xl bg-gold/15 text-gold flex items-center justify-center font-bold text-2xl">🛡️</div>
+      <div>
+        <h3 class="text-base font-extrabold text-primary">Stiker QR Fisik Anti-Pemalsuan</h3>
+        <p class="text-xs text-text-muted mt-0.5">Ditempelkan pada karya seni marmer asli</p>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl border-2 border-primary shadow-inner flex flex-col items-center">
+        <svg class="w-48 h-48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" fill="white"/>
+          <rect x="10" y="10" width="24" height="24" rx="4" fill="#00236F"/>
+          <rect x="14" y="14" width="16" height="16" rx="2" fill="white"/>
+          <rect x="18" y="18" width="8" height="8" rx="1" fill="#00236F"/>
+          <rect x="66" y="10" width="24" height="24" rx="4" fill="#00236F"/>
+          <rect x="70" y="14" width="16" height="16" rx="2" fill="white"/>
+          <rect x="74" y="18" width="8" height="8" rx="1" fill="#00236F"/>
+          <rect x="10" y="66" width="24" height="24" rx="4" fill="#00236F"/>
+          <rect x="14" y="70" width="16" height="16" rx="2" fill="white"/>
+          <rect x="18" y="74" width="8" height="8" rx="1" fill="#00236F"/>
+          <rect x="38" y="12" width="6" height="6" fill="#006C49"/>
+          <rect x="48" y="12" width="6" height="6" fill="#00236F"/>
+          <rect x="40" y="24" width="12" height="6" fill="#00236F"/>
+          <rect x="12" y="38" width="6" height="12" fill="#006C49"/>
+          <rect x="24" y="44" width="8" height="6" fill="#00236F"/>
+          <rect x="38" y="38" width="24" height="24" rx="4" fill="#00236F"/>
+          <circle cx="50" cy="50" r="6" fill="#6CF8BB"/>
+          <rect x="66" y="38" width="6" height="6" fill="#006C49"/>
+          <rect x="76" y="44" width="12" height="8" fill="#00236F"/>
+          <rect x="38" y="68" width="8" height="6" fill="#00236F"/>
+          <rect x="50" y="76" width="14" height="8" fill="#006C49"/>
+          <rect x="70" y="68" width="18" height="18" rx="2" fill="#00236F"/>
+        </svg>
+        <span id="qr-modal-code" class="mt-2 text-[10px] font-mono text-primary font-bold">REG-PEMKAB-TA/2026/09841</span>
+      </div>
+
+      <div class="text-[11px] text-text-muted leading-relaxed">
+        Stiker ini dilengkapi tanda tangan kriptografis <strong>SHA-256 + HMAC secret dinas</strong> yang tersimpan di simukti.db.
+      </div>
+
+      <button onclick="closeModal('modal-qr')" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-primary font-bold text-xs rounded-xl">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    async function gantiPaspor(uuid) {
+      try {
+        const p = await window.simukti.getPassport(uuid);
+        document.getElementById('p-title').innerText = p.product_name;
+        document.getElementById('p-category').innerText = `${p.product_category} • ${p.dimensions}`;
+        document.getElementById('p-reg').innerText = p.authenticity_seal_number;
+        document.getElementById('p-quarry').innerText = p.quarry_location_name || 'Kuari Marmer Besole';
+        document.getElementById('p-weight').innerText = p.weight_kg + ' kg';
+        document.getElementById('p-variety').innerText = p.stone_variety || 'Kalsit Alami';
+        document.getElementById('p-recycled').innerText = (p.circular_waste_recovered_pct || 100) + '%';
+        document.getElementById('p-caco3').innerText = (p.caco3_content_percentage || 98.4) + '%';
+        document.getElementById('p-caco3-bar').style.width = (p.caco3_content_percentage || 98.4) + '%';
+        document.getElementById('p-artisan-name').innerText = p.artisan_name || 'Pak Supardi';
+        document.getElementById('p-artisan-shop').innerText = `${p.workshop_name || 'Bengkel Marmer'}, ${p.workshop_subdistrict || 'Campurdarat'}`;
+        document.getElementById('p-img').src = p.finished_photo_url || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80';
+        document.getElementById('qr-modal-code').innerText = p.authenticity_seal_number;
+
+        // Render Linimasa dari DB
+        const tc = document.getElementById('timeline-container');
+        tc.innerHTML = '';
+        (p.timeline || []).forEach((t, idx) => {
+          const item = document.createElement('div');
+          item.className = 'relative';
+          item.innerHTML = `
+            <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
+              ${idx + 1}
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-primary">${t.event_title}</h4>
+                <span class="text-[10px] text-text-muted font-mono">${(t.event_timestamp || '').slice(0, 10)}</span>
+              </div>
+              <p class="text-[11px] text-text-muted mt-0.5">${t.event_description}</p>
+              <span class="inline-block text-[10px] font-bold text-secondary mt-1">✓ Validasi: ${t.verified_by}</span>
+            </div>
+          `;
+          tc.appendChild(item);
+        });
+
+      } catch (e) {
+        console.error('Gagal memuat paspor:', e);
+      }
+    }
+
+    function switchSpekTab(type) {
+      const btnAlami = document.getElementById('btn-spek-alami');
+      const btnSintetis = document.getElementById('btn-spek-sintetis');
+      const contentAlami = document.getElementById('spek-tab-alami');
+      const contentSintetis = document.getElementById('spek-tab-sintetis');
+
+      if (type === 'alami') {
+        btnAlami.className = "py-1.5 rounded-lg bg-white text-primary shadow-xs";
+        btnSintetis.className = "py-1.5 rounded-lg text-text-muted hover:text-primary";
+        contentAlami.classList.remove('hidden');
+        contentSintetis.classList.add('hidden');
+      } else {
+        btnSintetis.className = "py-1.5 rounded-lg bg-white text-red-600 shadow-xs";
+        btnAlami.className = "py-1.5 rounded-lg text-text-muted hover:text-primary";
+        contentSintetis.classList.remove('hidden');
+        contentAlami.classList.add('hidden');
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function unduhPassportPDF() {
+      alert("📄 Mengunduh e-Passport Resmi (Format PDF) bersertifikasi geologis dan tanda tangan digital...");
+    }
+
+    function hubungiPengrajin() {
+      alert("💬 Membuka obrolan WhatsApp dengan pengrajin lokal untuk pesanan kustom batu alam marmer Tulungagung.");
+    }
+
+    window.onload = () => gantiPaspor('09841-f8a4e32d-98bc-4122-8d99-7f32a00192ea');
+  </script>
+</body>
+</html>

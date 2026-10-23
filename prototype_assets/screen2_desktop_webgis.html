@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SI-MUKTI: MUKTI-Spasial Tulungagung | Web-GIS Dashboard (PRD & DB Connected)</title>
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Leaflet.js CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SI-MUKTI Database & API Client -->
+  <script src="simukti_client.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00236F",
+            "primary-container": "#1E3A8A",
+            secondary: "#006C49",
+            "secondary-container": "#6CF8BB",
+            "on-secondary-container": "#00714D",
+            "surface-canvas": "#F8FAFC",
+            "surface-card": "#FFFFFF",
+            "surface-muted": "#F1F5F9",
+            "border-subtle": "#E2E8F0",
+            "text-primary": "#0B1C30",
+            "text-muted": "#64748B",
+            gold: "#D97706"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            tabular: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8FAFC;
+      color: #0B1C30;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    #map { width: 100%; height: 100%; z-index: 10; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    .pulse-beacon { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(1.15); } }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden">
+
+  <!-- ================= TOP APP BAR ================= -->
+  <header class="bg-primary text-white px-5 py-3 flex items-center justify-between border-b border-white/10 shrink-0 z-30 shadow-md">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-white text-lg">
+        🏛️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-extrabold tracking-tight">SI-MUKTI <span class="font-normal opacity-80 text-sm">| MUKTI-Spasial Web-GIS</span></h1>
+          <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">PRD & Database Connected</span>
+        </div>
+        <p class="text-[11px] text-slate-300">Sistem Informasi Manajemen Spasial Karst & Rantai Pasok Marmer Tulungagung</p>
+      </div>
+    </div>
+
+    <!-- Center Quick Stat Indicator -->
+    <div class="hidden xl:flex items-center gap-6 text-xs border-x border-white/10 px-6">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-secondary-container pulse-beacon"></span>
+        <span>Akurasi GNSS Base Station: <strong class="text-secondary-container">&lt; 0.03m (RTK Fix)</strong></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm text-amber-300">cloud_done</span>
+        <span>Node: <strong>Disperindag TA (simukti.db)</strong></span>
+      </div>
+    </div>
+
+    <!-- Right Quick Actions: Rute Multi-Stop (FR-10) & Analitik Pemda (FR-11) -->
+    <div class="flex items-center gap-2">
+      <button onclick="openModal('modal-multistop')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold border border-white/20 flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-base text-amber-300">alt_route</span>
+        <span>Rute Multi-Stop (FR-10)</span>
+      </button>
+
+      <button onclick="openModal('modal-analytics')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-base">bar_chart</span>
+        <span>Analitik Pemda (FR-11)</span>
+      </button>
+
+      <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/10">
+        <div class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-xs font-bold">BS</div>
+        <div class="text-left text-xs">
+          <p class="font-bold leading-tight">Ir. Bambang S.</p>
+          <p class="text-[10px] text-slate-300">Disperindag Tulungagung</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SUB-HEADER TELEMETRY KPI STRIP ================= -->
+  <div class="bg-white border-b border-border-subtle px-5 py-2.5 flex items-center justify-between gap-4 shrink-0 overflow-x-auto text-xs z-20 shadow-xs">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-2.5 pr-6 border-r border-border-subtle">
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-secondary flex items-center justify-center border border-emerald-200">
+          <span class="material-symbols-outlined text-lg">recycling</span>
+        </div>
+        <div>
+          <span class="text-text-muted text-[11px]">Total Residu Terpetakan</span>
+          <div class="flex items-baseline gap-1.5">
+            <strong id="kpi-waste" class="text-sm font-extrabold text-primary font-tabular">248.5 Ton</strong>
+            <span class="text-[10px] font-bold text-secondary">+14.2% bln ini</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 pr-6 border-r border-border-subtle">
+        <div class="w-8 h-8 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center border border-blue-200">
+          <span class="material-symbols-outlined text-lg">storefront</span>
+        </div>
+        <div>
+          <span class="text-text-muted text-[11px]">Bengkel Pengrajin Aktif</span>
+          <div class="flex items-baseline gap-1.5">
+            <strong class="text-sm font-extrabold text-primary font-tabular">142 Sentra</strong>
+            <span class="text-[10px] text-text-muted">Campurdarat & Besole</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 pr-6 border-r border-border-subtle">
+        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+          <span class="material-symbols-outlined text-lg">payments</span>
+        </div>
+        <div>
+          <span class="text-text-muted text-[11px]">Nilai Valorisasi Sirkular</span>
+          <div class="flex items-baseline gap-1.5">
+            <strong class="text-sm font-extrabold text-secondary font-tabular">Rp 74.550.000</strong>
+            <span class="text-[10px] text-text-muted">Terdistribusi</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-secondary flex items-center justify-center border border-emerald-200">
+          <span class="material-symbols-outlined text-lg">eco</span>
+        </div>
+        <div>
+          <span class="text-text-muted text-[11px]">Pencegahan Dumping DAS Ngrowo</span>
+          <div class="flex items-baseline gap-1.5">
+            <strong class="text-sm font-extrabold text-secondary font-tabular">100% Zero-Dumping</strong>
+            <span class="text-[10px] text-secondary font-bold">-38.2% CO2 Logistik</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="refreshDataMap()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-primary font-bold rounded-lg border border-border-subtle flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-sm">sync</span>
+        <span>Refresh DB</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MAIN WORKSPACE (SIDEBAR + MAP) ================= -->
+  <div class="flex flex-1 overflow-hidden relative">
+
+    <!-- ================= LEFT SIDEBAR (FILTERS & WORKSHOP LIST) ================= -->
+    <aside class="w-80 md:w-96 bg-white border-r border-border-subtle flex flex-col justify-between shrink-0 z-20 shadow-lg">
+      <div class="flex flex-col h-full overflow-hidden">
+        
+        <div class="p-3.5 border-b border-border-subtle bg-slate-50 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-xl">tune</span>
+              <h2 class="text-xs font-bold text-primary uppercase tracking-wider">Filter Layer Spasial (FR-08)</h2>
+            </div>
+            <button onclick="resetFilters()" class="text-[11px] font-semibold text-secondary hover:underline">Reset</button>
+          </div>
+
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-text-muted text-base">search</span>
+            <input id="input-search" oninput="filterWorkshops()" type="text" placeholder="Cari nama bengkel, pemilik, atau desa..." class="w-full pl-9 pr-3 py-2 text-xs bg-white border border-border-subtle rounded-xl focus:outline-none focus:border-primary shadow-xs"/>
+          </div>
+        </div>
+
+        <div class="p-3.5 border-b border-border-subtle space-y-3">
+          <!-- Toggle Sludge -->
+          <label class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/70 border border-emerald-200 cursor-pointer hover:bg-emerald-50 transition-colors">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="check-sludge" checked onchange="toggleLayers()" class="w-4 h-4 text-secondary rounded focus:ring-secondary"/>
+              <div>
+                <p class="text-xs font-bold text-primary">Lumpur Sludge Basah (Pin Hijau)</p>
+                <p class="text-[10px] text-text-muted">Kadar CaCO3 &gt; 95% untuk Teraso/Paving</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">94.2 Ton</span>
+          </label>
+
+          <!-- Toggle Afur -->
+          <label class="flex items-center justify-between p-2 rounded-xl bg-amber-50/70 border border-amber-200 cursor-pointer hover:bg-amber-50 transition-colors">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="check-afur" checked onchange="toggleLayers()" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"/>
+              <div>
+                <p class="text-xs font-bold text-primary">Bongkahan Afur (Pin Oranye)</p>
+                <p class="text-[10px] text-text-muted">Pecahan Batu Kasar untuk Agregat</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">112.8 Ton</span>
+          </label>
+
+          <!-- Toggle Offtaker -->
+          <label class="flex items-center justify-between p-2 rounded-xl bg-blue-50/70 border border-blue-200 cursor-pointer hover:bg-blue-50 transition-colors">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="check-offtaker" checked onchange="toggleLayers()" class="w-4 h-4 text-primary rounded focus:ring-primary"/>
+              <div>
+                <p class="text-xs font-bold text-primary">Pabrik Offtaker (Pin Ungu)</p>
+                <p class="text-[10px] text-text-muted">PT Sentosa & Pabrik Olahan Pupuk</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-blue-100 text-primary-container text-[10px] font-bold">2 Mitra</span>
+          </label>
+
+          <!-- Radius Slider (FR-08) -->
+          <div class="pt-1">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-primary flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm text-secondary">radar</span>
+                Radius Logistik Pengambilan:
+              </span>
+              <span id="radius-val" class="font-extrabold text-secondary font-tabular">8 km</span>
+            </div>
+            <input type="range" id="slider-radius" min="2" max="15" value="8" step="1" oninput="updateRadius(this.value)" class="w-full accent-secondary cursor-pointer"/>
+            <div class="flex justify-between text-[10px] text-text-muted mt-0.5">
+              <span>2 km (Sentra Inti)</span>
+              <span>15 km (Koridor JLS)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrollable Workshop List from DB -->
+        <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2" id="workshop-list-container">
+          <!-- Populated dynamically from simukti.db -->
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ================= RIGHT LEAFLET MAP CANVAS ================= -->
+    <main class="flex-1 relative h-full w-full">
+      <div id="map"></div>
+
+      <!-- Basemap Switcher -->
+      <div class="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md p-1 rounded-xl shadow-lg border border-border-subtle flex items-center gap-1 text-xs">
+        <button id="btn-bm-vector" onclick="switchBaseMap('vector')" class="px-3 py-1.5 rounded-lg bg-primary text-white font-bold transition-all shadow-xs">Vektor Karst</button>
+        <button id="btn-bm-sat" onclick="switchBaseMap('sat')" class="px-3 py-1.5 rounded-lg text-text-muted hover:text-primary font-semibold transition-all">Citra Satelit</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="absolute bottom-6 left-4 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-border-subtle flex flex-col gap-2 text-xs max-w-xs">
+        <h4 class="font-extrabold text-primary text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-secondary">legend_toggle</span>
+          Legenda Peta Spasial SI-MUKTI
+        </h4>
+        <div class="space-y-1.5 text-[11px]">
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-emerald-600 border border-white shadow-xs"></span>
+            <span>Residu Lumpur Sludge (CaCO3 &gt; 95%)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-amber-500 border border-white shadow-xs"></span>
+            <span>Bongkahan Afur Kasar (Trosobo/Onyx)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-primary-container border border-white shadow-xs"></span>
+            <span>Fasilitas Pabrik Offtaker (Paving/Teraso)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-cyan-600 border border-white shadow-xs animate-ping"></span>
+            <span>Armada Truk Dump Beroperasi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SLIDE-OVER DETAIL CARD (FR-09) ================= -->
+      <div id="slideover-detail" class="absolute top-4 bottom-4 right-4 w-96 bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-secondary p-5 flex flex-col justify-between z-30 transition-all duration-300 translate-x-[110%] overflow-y-auto custom-scroll">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-start justify-between pb-3 border-b border-border-subtle">
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="detail-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-secondary text-[10px] font-bold border border-emerald-300">Siap Dispatch</span>
+                <span id="detail-code" class="text-[10px] font-mono text-text-muted">#BKL-CMP-001</span>
+              </div>
+              <h3 id="detail-name" class="text-base font-extrabold text-primary mt-1">Bengkel Marmer Al-Barokah</h3>
+              <p id="detail-owner" class="text-xs text-text-muted">Pemilik: <strong>Pak Supardi</strong> (52 thn)</p>
+            </div>
+            <button onclick="closeSlideOver()" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+              <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+
+          <!-- Waste Photo & Volume -->
+          <div class="relative w-full h-36 rounded-xl overflow-hidden border border-border-subtle shadow-sm">
+            <img id="detail-img" class="w-full h-full object-cover" alt="Foto Residu" src="https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?auto=format&fit=crop&w=400&q=80"/>
+            <div class="absolute bottom-2 left-2 right-2 bg-black/75 backdrop-blur-xs px-2.5 py-1 rounded-lg text-white text-[11px] flex justify-between items-center">
+              <span>Audit Kamera AI: <strong id="detail-vol">2.15 m³</strong></span>
+              <span class="text-emerald-400 font-bold">Akurasi: 96.5%</span>
+            </div>
+          </div>
+
+          <!-- KARTU HASIL UJI LABORATORIUM SNI 03-0394 -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-border-subtle flex flex-col gap-2">
+            <div class="flex items-center justify-between border-b border-border-subtle pb-2">
+              <span class="text-xs font-extrabold text-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-secondary">verified</span>
+                Uji Laboratorium SNI 03-0394
+              </span>
+              <span id="detail-cert" class="text-[10px] font-mono text-text-muted">LAB-SNI-2026/0394-081</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center pt-1">
+              <div class="p-2 bg-white rounded-lg border border-border-subtle">
+                <p class="text-[10px] text-text-muted">Kadar CaCO3</p>
+                <p id="detail-caco3" class="text-sm font-extrabold text-secondary font-tabular">98.40%</p>
+              </div>
+              <div class="p-2 bg-white rounded-lg border border-border-subtle">
+                <p class="text-[10px] text-text-muted">Kadar Air</p>
+                <p id="detail-moisture" class="text-sm font-extrabold text-primary font-tabular">14.20%</p>
+              </div>
+              <div class="p-2 bg-white rounded-lg border border-border-subtle">
+                <p class="text-[10px] text-text-muted">Derajat pH</p>
+                <p id="detail-ph" class="text-sm font-extrabold text-primary font-tabular">8.10</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kalkulasi Nilai Transaksi Instan -->
+          <div class="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 flex justify-between items-center">
+            <div>
+              <p class="text-[11px] text-text-muted font-medium">Estimasi Nilai Transaksi Residu:</p>
+              <p id="detail-calc" class="text-xs font-bold text-primary font-tabular">3.5 Ton × Rp 150.000 / ton</p>
+            </div>
+            <span id="detail-total-idr" class="text-base font-extrabold text-secondary font-tabular">Rp 525.000</span>
+          </div>
+
+          <!-- Alamat & Jarak -->
+          <div class="text-xs space-y-1 text-text-muted">
+            <p><strong class="text-text-primary">Lokasi:</strong> <span id="detail-address">Desa Gamping, Kec. Campurdarat</span></p>
+            <p><strong class="text-text-primary">Jarak dari Pabrik:</strong> <span id="detail-distance" class="text-secondary font-bold font-tabular">3.09 km</span> (Estimasi 8 menit ritase)</p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-border-subtle flex flex-col gap-2">
+          <button onclick="dispatchArmada()" class="w-full py-2.5 bg-secondary hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-base">local_shipping</span>
+            <span>Jadwalkan Armada Truk Offtaker</span>
+          </button>
+          <button onclick="bukaEmanifest()" class="w-full py-2 bg-white hover:bg-slate-50 text-primary border border-primary/30 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors">
+            <span class="material-symbols-outlined text-base">receipt</span>
+            <span>Cetak Surat Jalan Digital (e-Manifest)</span>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ================= MODAL: RUTE MULTI-STOP LOGISTIK (FR-10) ================= -->
+  <div id="modal-multistop" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto border border-border-subtle">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200">
+            <span class="material-symbols-outlined text-xl">alt_route</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold text-primary">Perencana Rute Logistik Cerdas Multi-Stop (FR-10)</h3>
+            <p class="text-[11px] text-text-muted">Optimasi penjemputan 3-5 bengkel dalam satu koridor efisien</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-multistop')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <!-- Ringkasan Efisiensi Logistik -->
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <div class="p-3 bg-slate-50 rounded-xl border border-border-subtle">
+          <span class="text-[10px] text-text-muted">Total Muatan</span>
+          <p class="text-sm font-extrabold text-primary font-tabular mt-0.5">6.35 Ton</p>
+          <span class="text-[9px] text-secondary font-bold">Kapasitas: 6.5T</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-border-subtle">
+          <span class="text-[10px] text-text-muted">Jarak Tempuh</span>
+          <p class="text-sm font-extrabold text-primary font-tabular mt-0.5">12.4 km</p>
+          <span class="text-[9px] text-text-muted">3 Titik Kunjungan</span>
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          <span class="text-[10px] text-text-muted">Reduksi Emisi</span>
+          <p class="text-sm font-extrabold text-secondary font-tabular mt-0.5">-38.2%</p>
+          <span class="text-[9px] text-secondary font-bold">CO2 eq Dihemat</span>
+        </div>
+      </div>
+
+      <!-- Sekuen Rute Truk -->
+      <div class="space-y-2 text-xs">
+        <h4 class="font-bold text-text-muted uppercase tracking-wider text-[10px]">Urutan Kunjungan Armada (AG 8492 UT):</h4>
+        
+        <div class="p-3 bg-white border border-border-subtle rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">S</span>
+            <div>
+              <p class="font-bold text-primary">Titik Awal: Pabrik PT Sentosa Teraso</p>
+              <p class="text-[10px] text-text-muted">Kawasan Industri Boyolangu • Berangkat 08:00 WIB</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-text-muted">Start</span>
+        </div>
+
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-secondary text-white text-[11px] font-bold flex items-center justify-center">1</span>
+            <div>
+              <p class="font-bold text-primary">Stop 1: Kerajinan Onyx Lestari (Desa Sawo)</p>
+              <p class="text-[10px] text-text-muted">Muat 2.85 Ton Afur Onyx • Jarak: 1.98 km</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-secondary">✓ Selesai Muat</span>
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-amber-500 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+            <div>
+              <p class="font-bold text-primary">Stop 2: Bengkel Al-Barokah (Desa Gamping)</p>
+              <p class="text-[10px] text-text-muted">Muat 3.50 Ton Sludge Bubut • Jarak: 3.09 km</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-amber-800 animate-pulse">Menuju Lokasi</span>
+        </div>
+
+        <div class="p-3 bg-white border border-border-subtle rounded-xl flex items-center justify-between opacity-80">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-slate-300 text-slate-700 text-[11px] font-bold flex items-center justify-center">E</span>
+            <div>
+              <p class="font-bold text-primary">Tujuan Akhir: Pabrik PT Sentosa Teraso</p>
+              <p class="text-[10px] text-text-muted">Bongkar muatan total 6.35 ton untuk produksi paving</p>
+            </div>
+          </div>
+          <span class="text-[10px] text-text-muted">Kembali</span>
+        </div>
+      </div>
+
+      <button onclick="closeModal('modal-multistop')" class="w-full py-2.5 bg-primary text-white font-bold text-xs rounded-xl">
+        Tutup Perencana Rute
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ANALITIK TELEMETRI PEMDA (FR-11) ================= -->
+  <div id="modal-analytics" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto border border-border-subtle">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-secondary flex items-center justify-center border border-emerald-200">
+            <span class="material-symbols-outlined text-xl">bar_chart</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold text-primary">Panel Telemetri & Analitik Pemda (FR-11)</h3>
+            <p class="text-[11px] text-text-muted">Neraca timbulan limbah versus penyerapan industri</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-analytics')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <!-- Metrik Utama Neraca -->
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="p-3.5 bg-slate-50 border border-border-subtle rounded-xl">
+          <span class="text-text-muted text-[11px]">Total Timbulan Terdata:</span>
+          <p class="text-xl font-extrabold text-primary font-tabular mt-0.5">113.5 Ton</p>
+          <p class="text-[10px] text-text-muted mt-0.5">Campurdarat & Besole (Okt 2026)</p>
+        </div>
+        <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <span class="text-text-muted text-[11px]">Terserap Industri Sirkular:</span>
+          <p class="text-xl font-extrabold text-secondary font-tabular mt-0.5">103.5 Ton</p>
+          <span class="text-[10px] font-bold text-secondary">Penyerapan: 91.2%</span>
+        </div>
+      </div>
+
+      <!-- Dampak Lingkungan & Ekonomi (Bab 7 PRD) -->
+      <div class="space-y-2 text-xs">
+        <h4 class="font-bold text-text-muted uppercase tracking-wider text-[10px]">Dampak Lingkungan & Ekonomi Terverifikasi:</h4>
+        
+        <div class="p-3 bg-white border border-border-subtle rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">water</span>
+            <div>
+              <p class="font-bold text-primary">Zero-Dumping DAS Ngrowo</p>
+              <p class="text-[10px] text-text-muted">103.5 ton lumpur kalsium dicegah dari sungai</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-secondary text-[10px] font-bold">100% Proteksi</span>
+        </div>
+
+        <div class="p-3 bg-white border border-border-subtle rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">forest</span>
+            <div>
+              <p class="font-bold text-primary">Reduksi Emisi Karbon Logistik</p>
+              <p class="text-[10px] text-text-muted">Pengurangan jarak angkut agregat luar daerah</p>
+            </div>
+          </div>
+          <span class="font-extrabold text-primary font-tabular text-sm">-3.953 kg CO2</span>
+        </div>
+
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">monetization_on</span>
+            <div>
+              <p class="font-bold text-primary">Surplus Ekonomi Perputaran Modal</p>
+              <p class="text-[10px] text-text-muted">Penghematan ongkos buang + pendapatan baru</p>
+            </div>
+          </div>
+          <span class="font-extrabold text-secondary font-tabular text-sm">Rp 25.875.000</span>
+        </div>
+      </div>
+
+      <button onclick="closeModal('modal-analytics')" class="w-full py-2.5 bg-primary text-white font-bold text-xs rounded-xl">
+        Tutup Panel Analitik
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SURAT JALAN DIGITAL (e-Manifest) ================= -->
+  <div id="modal-emanifest" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto border border-border-subtle">
+      <div class="flex items-center justify-between pb-3 border-b-2 border-primary">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-2xl">🏛️</div>
+          <div>
+            <h3 class="text-xs font-extrabold text-primary tracking-tight uppercase">Pemerintah Kabupaten Tulungagung</h3>
+            <h4 class="text-sm font-extrabold text-primary">SURAT JALAN DIGITAL ANGKUT LIMBAH MARMER</h4>
+            <p class="text-[10px] text-text-muted">Standar e-Manifest Lingkungan Hidup & Perindag • SI-MUKTI</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-emanifest')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-border-subtle">
+        <div>
+          <span class="text-[10px] text-text-muted">Nomor e-Manifest:</span>
+          <p class="font-mono font-bold text-primary">MNF-TA-20261022-0089</p>
+        </div>
+        <div>
+          <span class="text-[10px] text-text-muted">Tanggal Cetak:</span>
+          <p class="font-bold text-primary">22 Oktober 2026, 15:45 WIB</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200">
+          <p class="text-[10px] font-bold text-secondary uppercase">ASAL PENGIRIM (UMKM)</p>
+          <p class="font-extrabold text-primary mt-1">Bengkel Marmer Al-Barokah</p>
+          <p class="text-[11px] text-text-muted">Desa Gamping, Campurdarat</p>
+          <p class="text-[10px] text-text-muted font-mono">ID: PGY-CD-001 (Pak Supardi)</p>
+        </div>
+        <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-200">
+          <p class="text-[10px] font-bold text-primary-container uppercase">PENERIMA (OFFTAKER)</p>
+          <p class="font-extrabold text-primary mt-1">PT Sentosa Teraso & Paving</p>
+          <p class="text-[11px] text-text-muted">Kawasan Industri Boyolangu</p>
+          <p class="text-[10px] text-text-muted font-mono">PIC: Hendra Wijaya</p>
+        </div>
+      </div>
+
+      <table class="w-full text-left text-xs border border-border-subtle rounded-xl overflow-hidden">
+        <thead class="bg-slate-100 text-text-muted text-[11px]">
+          <tr>
+            <th class="p-2.5">Komoditas Residu</th>
+            <th class="p-2.5">Kadar CaCO3</th>
+            <th class="p-2.5">Berat Basah</th>
+            <th class="p-2.5 text-right">Nilai Rupiah</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border-subtle font-tabular">
+          <tr>
+            <td class="p-2.5 font-bold text-primary">Lumpur Sludge Bubut Super</td>
+            <td class="p-2.5 text-secondary font-bold">98.40% (SNI)</td>
+            <td class="p-2.5 font-bold">3.50 Ton</td>
+            <td class="p-2.5 text-right font-extrabold text-secondary">Rp 525.000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="flex items-center justify-between p-3 bg-slate-50 border border-border-subtle rounded-xl text-xs">
+        <div>
+          <p class="text-[10px] text-text-muted">Armada Angkut:</p>
+          <p class="font-bold text-primary">Truk Colt Diesel — AG 8492 UT</p>
+          <p class="text-[10px] text-text-muted">Pengemudi: Budi Santoso</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[9px] font-mono text-text-muted break-all">SHA-256: 7f83b1657ff1...9a01</p>
+          <span class="inline-block px-2 py-0.5 mt-1 bg-secondary text-white text-[9px] font-bold rounded">TERVALIDASI DISPERINDAG</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <button onclick="window.print()" class="flex-1 py-2.5 bg-primary text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-base">print</span>
+          <span>Cetak Dokumen PDF</span>
+        </button>
+        <button onclick="closeModal('modal-emanifest')" class="py-2.5 px-4 bg-slate-100 text-text-muted hover:text-primary font-bold text-xs rounded-xl">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LEAFLET JS SCRIPT ================= -->
+  <script>
+    let workshopsData = [];
+    const offtakersData = [
+      { id: 'off1', name: 'PT Sentosa Teraso & Paving', pic: 'Hendra Wijaya', lat: -8.1402, lng: 111.8750, capacity: '250 Ton / bln' },
+      { id: 'off2', name: 'CV Tulungagung Agro Kalsium', pic: 'Bambang Irawan', lat: -8.1920, lng: 111.8620, capacity: '120 Ton / bln' }
+    ];
+
+    let map;
+    let markersLayer = L.layerGroup();
+    let radiusCircle;
+    let baseLayers = {};
+    let currentRadiusKm = 8;
+    let routePolyline;
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    async function initMap() {
+      map = L.map('map', { zoomControl: false }).setView([-8.1650, 111.8700], 13);
+      L.control.zoom({ position: 'topright' }).addTo(map);
+
+      const vectorTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors | SI-MUKTI GIS'
+      });
+      const satTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri World Imagery | Tulungagung Karst'
+      });
+
+      baseLayers['vector'] = vectorTile;
+      baseLayers['sat'] = satTile;
+      vectorTile.addTo(map);
+      markersLayer.addTo(map);
+
+      radiusCircle = L.circle([-8.1402, 111.8750], {
+        color: '#006C49',
+        fillColor: '#6CF8BB',
+        fillOpacity: 0.12,
+        radius: currentRadiusKm * 1000,
+        dashArray: '6, 6',
+        weight: 2
+      }).addTo(map);
+
+      // Route Dispatch Truk Dump
+      const routePoints = [
+        [-8.1402, 111.8750], // PT Sentosa
+        [-8.1550, 111.8650], // Onyx Lestari
+        [-8.1633, 111.8594]  // Bengkel Al-Barokah
+      ];
+      routePolyline = L.polyline(routePoints, { color: '#006C49', weight: 4, dashArray: '8, 6' }).addTo(map);
+
+      await loadMapData();
+    }
+
+    async function loadMapData() {
+      // Ambil data langsung dari view database v_gis_active_waste_map
+      workshopsData = await window.simukti.getGisMap();
+      renderMarkers();
+      renderSidebarList();
+    }
+
+    function createCustomIcon(colorBg, iconName, label) {
+      return L.divIcon({
+        className: 'custom-leaflet-icon',
+        html: `
+          <div style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
+            <div style="background:${colorBg}; width:32px; height:32px; border-radius:50%; border:2px solid #ffffff; box-shadow:0 4px 10px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; color:#ffffff;">
+              <span class="material-symbols-outlined" style="font-size:18px;">${iconName}</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.95); border:1px solid #CBD5E1; border-radius:6px; padding:1px 6px; font-size:10px; font-weight:700; color:#00236F; margin-top:2px; white-space:nowrap; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+              ${label}
+            </div>
+          </div>
+        `,
+        iconSize: [32, 48],
+        iconAnchor: [16, 24]
+      });
+    }
+
+    function renderMarkers() {
+      markersLayer.clearLayers();
+
+      const showSludge = document.getElementById('check-sludge').checked;
+      const showAfur = document.getElementById('check-afur').checked;
+      const showOfftaker = document.getElementById('check-offtaker').checked;
+
+      workshopsData.forEach(w => {
+        const isSludge = w.waste_type === 'sludge_lumpur';
+        if (isSludge && !showSludge) return;
+        if (!isSludge && !showAfur) return;
+
+        const pinColor = isSludge ? '#006C49' : '#D97706';
+        const pinIcon = isSludge ? 'water_drop' : 'view_in_ar';
+        const label = `${w.workshop_name.split(' ')[1]} (${w.estimated_tonnage}T)`;
+
+        const marker = L.marker([w.latitude, w.longitude], {
+          icon: createCustomIcon(pinColor, pinIcon, label)
+        });
+
+        marker.on('click', () => openWorkshopDetail(w));
+        markersLayer.addLayer(marker);
+      });
+
+      if (showOfftaker) {
+        offtakersData.forEach(o => {
+          const marker = L.marker([o.lat, o.lng], {
+            icon: createCustomIcon('#00236F', 'factory', o.name.split(' ')[1])
+          });
+          marker.bindPopup(`<strong>${o.name}</strong><br/>Kapasitas: ${o.capacity}`);
+          markersLayer.addLayer(marker);
+        });
+
+        const truckMarker = L.marker([-8.1580, 111.8620], {
+          icon: createCustomIcon('#0284C7', 'local_shipping', 'Truk AG 8492 UT (ETA 8m)')
+        });
+        markersLayer.addLayer(truckMarker);
+      }
+    }
+
+    function renderSidebarList() {
+      const container = document.getElementById('workshop-list-container');
+      container.innerHTML = '';
+
+      const query = (document.getElementById('input-search').value || '').toLowerCase();
+      const showSludge = document.getElementById('check-sludge').checked;
+      const showAfur = document.getElementById('check-afur').checked;
+
+      workshopsData.forEach(w => {
+        const isSludge = w.waste_type === 'sludge_lumpur';
+        if (isSludge && !showSludge) return;
+        if (!isSludge && !showAfur) return;
+        if (query && !w.workshop_name.toLowerCase().includes(query) && !w.owner_name.toLowerCase().includes(query) && !w.subdistrict.toLowerCase().includes(query)) return;
+
+        const badgeColor = isSludge ? 'bg-emerald-100 text-secondary' : 'bg-amber-100 text-amber-800';
+        const card = document.createElement('div');
+        card.className = "p-3 bg-white border border-border-subtle rounded-xl hover:border-secondary transition-all cursor-pointer shadow-xs";
+        card.onclick = () => {
+          map.setView([w.latitude, w.longitude], 15);
+          openWorkshopDetail(w);
+        };
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full ${isSludge ? 'bg-secondary' : 'bg-amber-500'}"></span>
+                <h4 class="text-xs font-bold text-primary">${w.workshop_name}</h4>
+              </div>
+              <p class="text-[11px] text-text-muted mt-0.5">${w.owner_name} • ${w.subdistrict}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${w.estimated_tonnage} Ton</span>
+          </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[11px]">
+            <span class="text-text-muted font-medium">CaCO3: ${w.lab_caco3_pct || 98}%</span>
+            <strong class="text-secondary font-tabular">Rp ${Number(w.estimated_transaction_value_idr).toLocaleString('id-ID')}</strong>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openWorkshopDetail(w) {
+      document.getElementById('detail-code').innerText = `#${(w.waste_id || 'W1').slice(0,6).toUpperCase()}-TA`;
+      document.getElementById('detail-name').innerText = w.workshop_name;
+      document.getElementById('detail-owner').innerHTML = `Pemilik: <strong>${w.owner_name}</strong>`;
+      document.getElementById('detail-vol').innerText = `${w.estimated_volume_m3} m³ (~${w.estimated_tonnage} Ton)`;
+      document.getElementById('detail-caco3').innerText = (w.lab_caco3_pct || 98.4) + '%';
+      document.getElementById('detail-moisture').innerText = (w.lab_moisture_pct || 14.2) + '%';
+      document.getElementById('detail-ph').innerText = (w.lab_ph_level || 8.1);
+      document.getElementById('detail-cert').innerText = w.lab_cert_number || 'LAB-SNI-2026/0394-081';
+      document.getElementById('detail-calc').innerText = `${w.estimated_tonnage} Ton × Rp ${Number(w.rate_per_ton).toLocaleString('id-ID')} / ton`;
+      document.getElementById('detail-total-idr').innerText = 'Rp ' + Number(w.estimated_transaction_value_idr).toLocaleString('id-ID');
+      document.getElementById('detail-address').innerText = `${w.village || 'Desa'}, Kec. ${w.subdistrict}`;
+      document.getElementById('detail-distance').innerText = '3.09 km';
+      document.getElementById('detail-img').src = w.photo_url || 'https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?auto=format&fit=crop&w=400&q=80';
+
+      const slideOver = document.getElementById('slideover-detail');
+      slideOver.classList.remove('translate-x-[110%]');
+      slideOver.classList.add('translate-x-0');
+    }
+
+    function closeSlideOver() {
+      const slideOver = document.getElementById('slideover-detail');
+      slideOver.classList.add('translate-x-[110%]');
+      slideOver.classList.remove('translate-x-0');
+    }
+
+    function updateRadius(val) {
+      currentRadiusKm = parseInt(val);
+      document.getElementById('radius-val').innerText = `${currentRadiusKm} km`;
+      if (radiusCircle) radiusCircle.setRadius(currentRadiusKm * 1000);
+      renderMarkers();
+      renderSidebarList();
+    }
+
+    function toggleLayers() { renderMarkers(); renderSidebarList(); }
+    function filterWorkshops() { renderSidebarList(); }
+    function resetFilters() {
+      document.getElementById('check-sludge').checked = true;
+      document.getElementById('check-afur').checked = true;
+      document.getElementById('check-offtaker').checked = true;
+      document.getElementById('slider-radius').value = 8;
+      document.getElementById('input-search').value = '';
+      updateRadius(8);
+    }
+
+    function switchBaseMap(type) {
+      if (type === 'sat') {
+        map.removeLayer(baseLayers['vector']);
+        baseLayers['sat'].addTo(map);
+        document.getElementById('btn-bm-sat').className = "px-3 py-1.5 rounded-lg bg-primary text-white font-bold transition-all shadow-xs";
+        document.getElementById('btn-bm-vector').className = "px-3 py-1.5 rounded-lg text-text-muted hover:text-primary font-semibold transition-all";
+      } else {
+        map.removeLayer(baseLayers['sat']);
+        baseLayers['vector'].addTo(map);
+        document.getElementById('btn-bm-vector').className = "px-3 py-1.5 rounded-lg bg-primary text-white font-bold transition-all shadow-xs";
+        document.getElementById('btn-bm-sat').className = "px-3 py-1.5 rounded-lg text-text-muted hover:text-primary font-semibold transition-all";
+      }
+    }
+
+    function dispatchArmada() {
+      alert("✅ Armada Truk Dump AG 8492 UT berhasil ditugaskan untuk penjemputan!");
+    }
+
+    function bukaEmanifest() { openModal('modal-emanifest'); }
+    function closeModalEmanifest() { closeModal('modal-emanifest'); }
+
+    async function refreshDataMap() {
+      await loadMapData();
+      alert("📡 Telemetri spasial diperbarui langsung dari simukti.db!");
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>

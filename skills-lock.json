@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "naskah-id": {
+      "source": "nothinx/naskah-id",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "1e5928c5c476786e2f436f1436bc7d301b74d551b78849d69517bf6d8deb1306"
+    }
+  }
+}

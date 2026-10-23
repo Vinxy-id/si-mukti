@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SI-MUKTI Tulungagung - Interactive Prototype Showcase (PRD & Database Connected)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#00236F',
+              blue: '#1E3A8A',
+              accent: '#4059AA',
+              light: '#DCE1FF'
+            },
+            eco: {
+              emerald: '#10B981',
+              dark: '#006C49',
+              light: '#6CF8BB',
+              subtle: '#ECFDF5'
+            },
+            mineral: {
+              canvas: '#F8FAFC',
+              card: '#FFFFFF',
+              well: '#F1F5F9',
+              border: '#E2E8F0',
+              text: '#0B1C30',
+              muted: '#64748B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            tabular: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0F172A;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .device-mockup-mobile {
+      width: 390px;
+      height: 844px;
+      border: 12px solid #1E293B;
+      border-radius: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      position: relative;
+      background: #FFFFFF;
+    }
+    .device-mockup-desktop {
+      width: 100%;
+      max-width: 1280px;
+      height: 800px;
+      border: 8px solid #1E293B;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      position: relative;
+      background: #F8FAFC;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER BAR -->
+  <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50 shadow-xl">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-blue to-eco-emerald flex items-center justify-center font-bold text-white shadow-lg text-lg">
+        🏛️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-lg text-white tracking-tight">SI-MUKTI Tulungagung</h1>
+          <span class="px-2 py-0.5 text-xs font-semibold bg-eco-emerald/20 text-eco-emerald border border-eco-emerald/40 rounded-full">100% PRD & Database Connected</span>
+        </div>
+        <p class="text-xs text-slate-400">Inovasi Geospasial, Rantai Pasok, & Paspor Ketertelusuran Marmer Sirkular</p>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="flex items-center bg-slate-800 p-1.5 rounded-xl border border-slate-700/60 shadow-inner">
+      <button onclick="switchTab('screen1')" id="btn-screen1" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 bg-brand-blue text-white shadow-md flex items-center gap-2">
+        📱 Layar 1: Mobile UMKM
+      </button>
+      <button onclick="switchTab('screen2')" id="btn-screen2" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+        🗺️ Layar 2: Web-GIS Spasial
+      </button>
+      <button onclick="switchTab('screen3')" id="btn-screen3" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+        🛡️ Layar 3: MUKTI-Trace QR
+      </button>
+      <button onclick="switchTab('matrix')" id="btn-matrix" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+        📊 Matriks PRD & DB
+      </button>
+      <button onclick="switchTab('figma')" id="btn-figma" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 text-slate-400 hover:text-white flex items-center gap-2">
+        🎨 Design System
+      </button>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="flex items-center gap-2">
+      <div id="backend-status-pill" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-700 text-xs font-semibold text-emerald-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>simukti.db Online</span>
+      </div>
+      <a href="06_Database/ERD_DATABASE.md" target="_blank" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+        🗄️ ERD & Data Dict
+      </a>
+      <a href="Draft_Naskah_LKTIN_SI-MUKTI_UNIMED2026.docx" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-md">
+        📄 Naskah LKTI (.docx)
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN SHOWCASE CONTAINER -->
+  <main class="flex-1 p-6 md:p-8 flex flex-col items-center justify-center max-w-7xl mx-auto w-full">
+
+    <!-- ==================== TAB 1: SCREEN 1 (MOBILE PENGRAJIN) ==================== -->
+    <section id="section-screen1" class="w-full flex flex-col items-center gap-6">
+      <div class="text-center max-w-2xl">
+        <span class="px-3 py-1 bg-brand-blue/30 text-blue-300 border border-brand-blue/50 text-xs font-bold rounded-full uppercase tracking-wider">Layar 1 — PRD Modul 4.1 & Modul 4.3</span>
+        <h2 class="text-2xl font-bold mt-2 text-white">MUKTI-Pengrajin: Valorisasi, Setor Residu & Dompet MUKTI-Pay</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Tersambung langsung ke tabel <code class="text-emerald-400">wallets</code>, <code class="text-emerald-400">waste_logs</code>, dan <code class="text-emerald-400">product_passports</code> pada database simukti.db.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-8 w-full">
+        <div class="device-mockup-mobile flex flex-col">
+          <div class="h-7 bg-slate-900 w-full flex items-center justify-between px-6 text-[10px] text-slate-400 select-none z-10">
+            <span>09:41</span>
+            <div class="flex items-center gap-1.5"><span>5G</span><span>100%</span></div>
+          </div>
+          <iframe id="iframe-s1" src="prototype_assets/screen1_mobile_pengrajin.html" class="w-full flex-1 border-0"></iframe>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 max-w-md w-full shadow-xl flex flex-col gap-4 text-sm">
+          <div class="border-b border-slate-700 pb-3">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-eco-emerald">●</span> Fitur Sesuai PRD & Database
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Tabel Terhubung: workshops, wallets, waste_logs, payout_withdrawals</p>
+          </div>
+
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">FR-06: Dompet MUKTI-Pay & Tarik Dana</strong>
+              Klik tombol <em>"Tarik Dana"</em> untuk mencairkan saldo ke Bank Jatim. Data tersimpan ke tabel <code>payout_withdrawals</code> dan mengurangi saldo di <code>wallets</code> secara nyata.
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">FR-03 & FR-04: AI Volumetric Camera Audit</strong>
+              Klik <em>"Setor Residu Limbah Baru"</em> untuk mensimulasikan audit kontur 3D kamera. Volume $2.4\text{ m}^3 \rightarrow 3.8\text{ Ton}$ otomatis tercatat ke tabel <code>waste_logs</code>.
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">FR-12 & FR-13: Penerbitan Paspor Digital</strong>
+              Klik <em>"Terbitkan Paspor Digital Produk"</em> untuk mendaftarkan karya baru lengkap dengan segel resmi Pemkab Tulungagung dan kalkulator zero-waste sirkular 100%.
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">FR-05: Pelacakan Armada Truk Penjemput</strong>
+              Simulasikan perjalanan truk dump AG 8492 UT. Begitu status tiba di bengkel & ditimbang, insentif +Rp 525.000 otomatis dikreditkan ke dompet pengrajin!
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-col gap-2">
+            <a href="prototype_assets/screen1_mobile_pengrajin.html" target="_blank" class="w-full py-2.5 px-4 bg-brand-blue hover:bg-blue-700 text-white font-semibold rounded-xl text-center text-xs transition shadow-md flex items-center justify-center gap-2">
+              <span>🌐 Buka Layar Penuh di Tab Baru</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: SCREEN 2 (WEB-GIS SPASIAL) ==================== -->
+    <section id="section-screen2" class="w-full flex flex-col items-center gap-6 hidden">
+      <div class="text-center max-w-2xl">
+        <span class="px-3 py-1 bg-eco-emerald/20 text-eco-emerald border border-eco-emerald/40 text-xs font-bold rounded-full uppercase tracking-wider">Layar 2 — PRD Modul 4.2</span>
+        <h2 class="text-2xl font-bold mt-2 text-white">MUKTI-Spasial: Peta Leaflet.js, Multi-Stop & e-Manifest</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Menampilkan titik spasial riil Campurdarat & Besole langsung dari view database <code class="text-emerald-400">v_gis_active_waste_map</code>.
+        </p>
+      </div>
+
+      <div class="device-mockup-desktop flex flex-col">
+        <div class="h-8 bg-slate-900 border-b border-slate-800 w-full flex items-center px-4 gap-2 select-none z-10">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block"></span>
+          </div>
+          <div class="flex-1 text-center text-[11px] text-slate-400 font-mono">
+            https://si-mukti.tulungagung.go.id/gis-telemetry/campurdarat (Live simukti.db)
+          </div>
+        </div>
+        <iframe id="iframe-s2" src="prototype_assets/screen2_desktop_webgis.html" class="w-full flex-1 border-0"></iframe>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-4 w-full max-w-5xl bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4">
+        <div class="flex items-center gap-3 text-xs text-slate-300">
+          <span class="font-bold text-white">Fitur Terintegrasi:</span>
+          <span class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-700">FR-07: Peta Leaflet Asli</span>
+          <span class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-700">FR-08: Filter Slider Radius 2-15km</span>
+          <span class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-700">FR-09: Uji Lab SNI 03-0394</span>
+          <span class="px-2.5 py-1 bg-slate-900 rounded-lg border border-slate-700">FR-10: Rute Multi-Stop</span>
+        </div>
+        <a href="prototype_assets/screen2_desktop_webgis.html" target="_blank" class="py-2 px-3 bg-brand-blue hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition shadow-md">
+          🌐 Buka Web-GIS Layar Penuh
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: SCREEN 3 (MUKTI-TRACE QR) ==================== -->
+    <section id="section-screen3" class="w-full flex flex-col items-center gap-6 hidden">
+      <div class="text-center max-w-2xl">
+        <span class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs font-bold rounded-full uppercase tracking-wider">Layar 3 — PRD Modul 4.3</span>
+        <h2 class="text-2xl font-bold mt-2 text-white">MUKTI-Trace: Paspor Digital Produk & Sertifikat Keaslian</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Halaman verifikasi publik konsumen langsung membaca dari view database <code class="text-emerald-400">v_public_passport_verification</code> dan linimasa <code class="text-emerald-400">traceability_events</code>.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-8 w-full">
+        <div class="device-mockup-mobile flex flex-col">
+          <div class="h-7 bg-slate-900 w-full flex items-center justify-between px-6 text-[10px] text-slate-400 select-none z-10">
+            <span>09:41</span>
+            <div class="flex items-center gap-1.5"><span>5G</span><span>100%</span></div>
+          </div>
+          <iframe id="iframe-s3" src="prototype_assets/screen3_mobile_trace_qr.html" class="w-full flex-1 border-0"></iframe>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 max-w-md w-full shadow-xl flex flex-col gap-4 text-sm">
+          <div class="border-b border-slate-700 pb-3">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <span class="text-amber-400">🛡️</span> Integritas Paspor Digital (FR-15)
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Tabel Terhubung: product_passports, quarry_blocks, lab_test_reports</p>
+          </div>
+
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">1. Segel Resmi Pemkab Tulungagung</strong>
+              Nomor registrasi unik <code>REG-PEMKAB-TA/2026/09841</code> dengan <em>Signed Hash</em> SHA-256 HMAC yang tidak dapat dipalsukan marmer sintetis.
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">2. Asal Kuari Tambang Karst Besole Blok 4</strong>
+              Membuktikan keaslian geologis dari Formasi Wonosari Karst Tulungagung dengan nomor izin resmi ESDM Jawa Timur (IUP: 540/328/IUP-OP).
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">3. Uji Spektrometri Kalsit CaCO3 98.40%</strong>
+              Membandingkan struktur kristal tembus pandang batuan alam vs marmer sintetis tiruan impor berbasis resin poliester.
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+              <strong class="text-white block mb-0.5">4. Linimasa Rantai Pasok Lengkap</strong>
+              Menyajikan 4 tahapan kronologis: Ekstraksi Kuari ➔ Pembubutan Bengkel ➔ Pengujian Lab ➔ Penyerapan 100% Residu Sirkular.
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-col gap-2">
+            <a href="prototype_assets/screen3_mobile_trace_qr.html" target="_blank" class="w-full py-2.5 px-4 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl text-center text-xs transition shadow-md flex items-center justify-center gap-2">
+              <span>🌐 Buka Paspor Layar Penuh di Tab Baru</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: MATRIKS PRD & DATABASE ==================== -->
+    <section id="section-matrix" class="w-full flex flex-col items-center gap-6 max-w-5xl hidden">
+      <div class="text-center max-w-2xl">
+        <span class="px-3 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/40 text-xs font-bold rounded-full uppercase tracking-wider">Arsitektur Terintegrasi</span>
+        <h2 class="text-2xl font-bold mt-2 text-white">Matriks Keselarasan PRD, UI/UX & Basis Data</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Memastikan setiap Kebutuhan Fungsional (FR-01 s.d. FR-15) berkorespondensi 100% dengan tabel dan kolom basis data.
+        </p>
+      </div>
+
+      <div class="w-full overflow-x-auto bg-slate-800/90 border border-slate-700 rounded-2xl shadow-xl">
+        <table class="w-full text-left text-xs divide-y divide-slate-700">
+          <thead class="bg-slate-900/80 text-slate-300 font-bold uppercase text-[11px]">
+            <tr>
+              <th class="p-3.5">ID Kebutuhan PRD</th>
+              <th class="p-3.5">Komponen Layar UI/UX</th>
+              <th class="p-3.5">Tabel Basis Data Terhubung</th>
+              <th class="p-3.5">Operasi Logika Bisnis</th>
+              <th class="p-3.5">Status Pengujian</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-700/60 text-slate-300">
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-01: Autentikasi Pengrajin</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Header Bengkel)</td>
+              <td class="p-3.5 font-mono text-emerald-400">users, workshops</td>
+              <td class="p-3.5">Login OTP nomor ponsel, ID Paguyuban PGY-CD-001</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-02: Dashboard Valorisasi Saldo</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Hero Card)</td>
+              <td class="p-3.5 font-mono text-emerald-400">wallets, wallet_transactions</td>
+              <td class="p-3.5">Akumulasi pendapatan bersih limbah terdistribusi</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-03: Pencatatan Residu Limbah</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Modal Setor)</td>
+              <td class="p-3.5 font-mono text-emerald-400">waste_logs</td>
+              <td class="p-3.5">Perekaman sludge/afur & GNSS akurasi &lt;3m</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-04: AI Volumetric Camera</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Viewfinder AI)</td>
+              <td class="p-3.5 font-mono text-emerald-400">waste_logs (polygon, vol)</td>
+              <td class="p-3.5">Deteksi kontur 3D mesh kubikasi dan tonase basah</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-05: Pelacakan Armada Truk</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Progress Tracker)</td>
+              <td class="p-3.5 font-mono text-emerald-400">pickup_orders, vehicles</td>
+              <td class="p-3.5">4 Tahapan penjemputan, ETA kedatangan, kontak sopir</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-06: MUKTI-Pay & Tarik Dana</td>
+              <td class="p-3.5 text-blue-300">Layar 1 (Modal Tarik)</td>
+              <td class="p-3.5 font-mono text-emerald-400">payout_withdrawals</td>
+              <td class="p-3.5">Pencairan saldo ke rekening Bank Jatim bebas biaya</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-07: Peta Vektor Karst Web-GIS</td>
+              <td class="p-3.5 text-blue-300">Layar 2 (Peta Leaflet)</td>
+              <td class="p-3.5 font-mono text-emerald-400">v_gis_active_waste_map</td>
+              <td class="p-3.5">Peta resolusi tinggi Campurdarat, Besole, & koridor JLS</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-08: Filter Layer & Radius</td>
+              <td class="p-3.5 text-blue-300">Layar 2 (Sidebar Filter)</td>
+              <td class="p-3.5 font-mono text-emerald-400">waste_logs (type, status)</td>
+              <td class="p-3.5">Toggle Pin Hijau, Oranye, Ungu, dan slider 2-15 km</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-09: Modal Detail Bengkel & e-Manifest</td>
+              <td class="p-3.5 text-blue-300">Layar 2 (Slide-over Detail)</td>
+              <td class="p-3.5 font-mono text-emerald-400">lab_test_reports</td>
+              <td class="p-3.5">Uji SNI 03-0394, nilai transaksi, cetak surat jalan</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-10: Batch Route Multi-Stop</td>
+              <td class="p-3.5 text-blue-300">Layar 2 (Modal Rute)</td>
+              <td class="p-3.5 font-mono text-emerald-400">pickup_stops</td>
+              <td class="p-3.5">Rute optimasi 3 titik bengkel dalam satu ritase</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-11: Telemetri & Analitik Pemda</td>
+              <td class="p-3.5 text-blue-300">Layar 2 (Modal Analitik)</td>
+              <td class="p-3.5 font-mono text-emerald-400">regional_environmental_metrics</td>
+              <td class="p-3.5">Neraca timbulan vs penyerapan, proteksi DAS Ngrowo</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-12 & 13: Generator Paspor Digital</td>
+              <td class="p-3.5 text-blue-300">Layar 1 & 3</td>
+              <td class="p-3.5 font-mono text-emerald-400">product_passports</td>
+              <td class="p-3.5">Registrasi karya, kuari asal, kontribusi sirkular 100%</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-bold text-white">FR-14 & 15: Verifikasi QR Publik</td>
+              <td class="p-3.5 text-blue-300">Layar 3 (Landing Page)</td>
+              <td class="p-3.5 font-mono text-emerald-400">v_public_passport_verification</td>
+              <td class="p-3.5">Segel resmi Pemkab, spektrometri, linimasa kuari ke pasar</td>
+              <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">100% Lolos</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: FIGMA SPECS & EXPORT ==================== -->
+    <section id="section-figma" class="w-full flex flex-col items-center gap-8 max-w-5xl hidden">
+      <div class="text-center max-w-2xl">
+        <span class="px-3 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/40 text-xs font-bold rounded-full uppercase tracking-wider">Figma Design System</span>
+        <h2 class="text-2xl font-bold mt-2 text-white">Desain Sistem 'Tatah Mineral' & Standardisasi Antarmuka</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Disesuaikan dengan kebutuhan pengrajin di area bengkel berdebu dengan tombol minimal 48px dan rasio kontras WCAG 2.1 AA.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-2">
+          <div class="h-12 rounded-lg bg-[#00236F] border border-blue-400/30 flex items-center justify-center font-mono text-xs font-bold text-white">#00236F</div>
+          <span class="text-xs font-bold text-white">Navy Quarry (Primary Dark)</span>
+          <span class="text-[11px] text-slate-400">Warna otoritas & kontras navigasi</span>
+        </div>
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-2">
+          <div class="h-12 rounded-lg bg-[#006C49] border border-emerald-400/30 flex items-center justify-center font-mono text-xs font-bold text-white">#006C49</div>
+          <span class="text-xs font-bold text-white">Circular Emerald (Eco)</span>
+          <span class="text-[11px] text-slate-400">Simbol ekonomi sirkular & saldo cair</span>
+        </div>
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-2">
+          <div class="h-12 rounded-lg bg-[#D97706] border border-amber-400/30 flex items-center justify-center font-mono text-xs font-bold text-white">#D97706</div>
+          <span class="text-xs font-bold text-white">Gold Authenticity</span>
+          <span class="text-[11px] text-slate-400">Stempel resmi keaslian geologis batuan</span>
+        </div>
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-2">
+          <div class="h-12 rounded-lg bg-[#F8FAFC] border border-slate-400/30 flex items-center justify-center font-mono text-xs font-bold text-slate-900">#F8FAFC</div>
+          <span class="text-xs font-bold text-slate-900">Carrara Canvas</span>
+          <span class="text-[11px] text-slate-400">Latar cerah nyaman di bawah terik matahari</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
+    Karya Ilmiah Tim Salma Azzahra — Universitas Negeri Medan (LKTIN UNIMED 2026) | Sistem Informasi SI-MUKTI Tulungagung
+  </footer>
+
+  <script>
+    function switchTab(tabId) {
+      const allTabs = ['screen1', 'screen2', 'screen3', 'matrix', 'figma'];
+      allTabs.forEach(t => {
+        document.getElementById('section-' + t).classList.add('hidden');
+        const btn = document.getElementById('btn-' + t);
+        btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-md');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById('section-' + tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('bg-brand-blue', 'text-white', 'shadow-md');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>SI-MUKTI Mobile - Sentra Marmer Campurdarat (PRD & DB Connected)</title>
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SI-MUKTI Database & API Client -->
+  <script src="simukti_client.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00236F",
+            "primary-container": "#1E3A8A",
+            secondary: "#006C49",
+            "secondary-container": "#6CF8BB",
+            "on-secondary-container": "#00714D",
+            "surface-canvas": "#F8FAFC",
+            "surface-card": "#FFFFFF",
+            "surface-muted": "#F1F5F9",
+            "border-subtle": "#E2E8F0",
+            "text-primary": "#0B1C30",
+            "text-muted": "#64748B",
+            gold: "#D97706"
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            tabular: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8FAFC;
+      color: #0B1C30;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    .tap-target {
+      min-height: 48px;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 12px -2px rgba(30, 58, 138, 0.06), 0 2px 4px -2px rgba(30, 58, 138, 0.04);
+    }
+    .scanner-line {
+      animation: scan 2s ease-in-out infinite alternate;
+    }
+    @keyframes scan {
+      0% { top: 10%; opacity: 0.8; }
+      100% { top: 85%; opacity: 0.8; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-secondary-container selection:text-on-secondary-container pb-24">
+
+  <!-- ================= TOP APP BAR (FR-01) ================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border-subtle w-full shadow-sm">
+    <div class="flex justify-between items-center w-full px-4 h-16 max-w-md mx-auto">
+      <div class="flex items-center gap-3">
+        <div class="relative w-11 h-11 rounded-full border-2 border-primary overflow-hidden shrink-0 shadow-sm">
+          <img class="w-full h-full object-cover" alt="Pak Supardi" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=200&q=80"/>
+          <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-secondary border-2 border-white rounded-full"></span>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="text-base font-extrabold text-primary tracking-tight">SI-MUKTI</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary/15 text-secondary border border-secondary/30">Pengrajin</span>
+          </div>
+          <span class="text-xs text-text-muted font-medium">Sentra Campurdarat, Tulungagung</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <div id="db-status-pill" class="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-secondary text-[10px] font-bold rounded-lg border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          <span>DB Connected</span>
+        </div>
+        <button onclick="showToast('Sistem sinkron dengan basis data simukti.db')" class="p-2 rounded-full hover:bg-slate-100 text-text-primary transition-colors">
+          <span class="material-symbols-outlined text-2xl">notifications</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= WORKSHOP IDENTIFIER BAR (FR-01) ================= -->
+  <div class="w-full bg-slate-100/80 border-b border-border-subtle py-2">
+    <div class="max-w-md mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center gap-2 overflow-hidden">
+        <span class="material-symbols-outlined text-primary text-xl shrink-0" style="font-variation-settings: 'FILL' 1;">storefront</span>
+        <div class="truncate">
+          <p class="text-xs font-bold text-primary truncate">Bengkel Marmer Al-Barokah</p>
+          <p class="text-[11px] text-text-muted">Desa Gamping • ID Paguyuban: PGY-CD-001</p>
+        </div>
+      </div>
+      <span class="inline-flex items-center gap-1 bg-white text-secondary px-2.5 py-1 rounded-full text-[11px] font-bold border border-secondary/30 shrink-0 shadow-xs">
+        <span class="material-symbols-outlined text-xs font-bold text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+        <span>SNI Lolos</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <main class="w-full max-w-md mx-auto px-4 pt-4 flex flex-col gap-4">
+
+    <!-- HERO METRIC: Saldo Valorisasi Limbah (FR-02 & FR-06) -->
+    <section class="bg-white rounded-2xl p-4 border border-border-subtle card-shadow relative overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-secondary to-primary-container"></div>
+      
+      <div class="flex flex-col gap-3 pt-1">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-secondary text-base" style="font-variation-settings: 'FILL' 1;">recycling</span>
+              <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">Saldo Valorisasi Limbah (MUKTI-Pay)</p>
+            </div>
+            <h2 id="display-balance" class="text-3xl font-extrabold text-primary font-tabular mt-1 tracking-tight">Memuat...</h2>
+            <p class="text-xs text-text-muted mt-0.5">Tersinkronisasi langsung dengan buku kas basis data</p>
+          </div>
+          <span class="inline-flex items-center gap-1 bg-emerald-50 text-secondary px-2 py-1 rounded-lg text-xs font-bold border border-emerald-200">
+            <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+            +18.4%
+          </span>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+            <span class="text-xs text-text-muted font-medium">Bebas Biaya Tarik Bank Jatim</span>
+          </div>
+          <!-- Primary CTA Button: Tarik Dana (FR-06) -->
+          <button onclick="openModal('modal-tarik-dana')" class="tap-target bg-secondary hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all" type="button">
+            <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+            <span>Tarik Dana</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-COLUMN METRICS GRID (FR-02) -->
+    <section class="grid grid-cols-2 gap-3">
+      <!-- Card 1: Limbah Tersalurkan -->
+      <div class="bg-white rounded-xl p-3.5 border border-border-subtle card-shadow flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-secondary border border-emerald-200">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">delete_sweep</span>
+          </div>
+          <span class="text-[10px] font-bold text-secondary bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Bulan Ini</span>
+        </div>
+        <div>
+          <p class="text-xs text-text-muted font-medium">Limbah Terserap</p>
+          <p id="display-tonnage" class="text-xl font-extrabold text-primary font-tabular mt-0.5">8.5 Ton</p>
+          <p class="text-[11px] text-text-muted mt-0.5">Sludge & Afur ke Teraso</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Paspor QR Terbit (FR-12) -->
+      <div class="bg-white rounded-xl p-3.5 border border-border-subtle card-shadow flex flex-col justify-between">
+        <div class="flex justify-between items-start mb-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-primary-container border border-blue-200">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">qr_code_2</span>
+          </div>
+          <span class="text-[10px] font-bold text-primary-container bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">Tersertifikasi</span>
+        </div>
+        <div>
+          <p class="text-xs text-text-muted font-medium">Paspor QR Terbit</p>
+          <p id="display-passports" class="text-xl font-extrabold text-primary font-tabular mt-0.5">34 Produk</p>
+          <p class="text-[11px] text-text-muted mt-0.5">Geologis Asli Tulungagung</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK ACTIONS (FR-03, FR-04, FR-12) -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider">Aksi Cepat Pengrajin (PRD Modul 1)</h3>
+      </div>
+
+      <!-- Primary Action: Setor Residu Limbah Baru (FR-03 & FR-04) -->
+      <button onclick="openModal('modal-setor-limbah')" class="tap-target w-full bg-primary hover:bg-navy text-white rounded-xl p-3.5 flex items-center justify-between border-2 border-secondary shadow-md active:scale-98 transition-all group" type="button">
+        <div class="flex items-center gap-3 text-left">
+          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center border border-white/20 text-white shrink-0">
+            <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">add_a_photo</span>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold leading-tight">Setor Residu Limbah Baru</h4>
+            <p class="text-[11px] text-slate-300">Gunakan Kamera AI atau Input Tonase</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 text-secondary-container bg-white/10 px-2 py-1 rounded-lg">
+          <span class="text-xs font-bold">Mulai</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </div>
+      </button>
+
+      <!-- Action 2: Terbitkan Paspor Digital Produk Baru (FR-12 & FR-13) -->
+      <button onclick="openModal('modal-buat-paspor')" class="tap-target w-full bg-white hover:bg-amber-50/50 text-primary border-2 border-gold/40 rounded-xl p-3 flex items-center justify-between shadow-xs active:scale-98 transition-all">
+        <div class="flex items-center gap-3 text-left">
+          <div class="w-9 h-9 rounded-lg bg-amber-50 text-gold flex items-center justify-center border border-gold/30 shrink-0">
+            <span class="material-symbols-outlined text-xl">verified</span>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-primary leading-tight">Terbitkan Paspor Digital Produk</h4>
+            <p class="text-[10px] text-text-muted">Daftarkan karya marmer & terbitkan stiker QR resmi</p>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold text-gold bg-amber-50 px-2 py-0.5 rounded border border-gold/30">FR-12</span>
+      </button>
+
+      <!-- Secondary Grid Actions -->
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="openModal('modal-lacak-truk')" class="tap-target bg-white hover:bg-slate-50 border border-border-subtle p-3 rounded-xl flex items-center gap-2.5 text-left card-shadow active:scale-95 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200 shrink-0">
+            <span class="material-symbols-outlined text-lg">local_shipping</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-primary leading-tight">Lacak Truk</p>
+            <p class="text-[10px] text-text-muted">Armada Penjemput</p>
+          </div>
+        </button>
+
+        <button onclick="openModal('modal-riwayat')" class="tap-target bg-white hover:bg-slate-50 border border-border-subtle p-3 rounded-xl flex items-center gap-2.5 text-left card-shadow active:scale-95 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-primary-container flex items-center justify-center border border-blue-200 shrink-0">
+            <span class="material-symbols-outlined text-lg">receipt_long</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-primary leading-tight">Buku Mutasi</p>
+            <p class="text-[10px] text-text-muted">Riwayat Ledger DB</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ACTIVE ORDER TRACKER CARD (FR-05) -->
+    <section class="bg-white rounded-2xl p-4 border border-border-subtle card-shadow flex flex-col gap-3">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+          <span class="text-xs font-bold text-primary">Penjemputan Sedang Berlangsung</span>
+        </div>
+        <span class="text-[11px] font-mono font-semibold text-text-muted">#TRK-20261022-001</span>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 border border-border-subtle flex items-center justify-center text-primary shrink-0">
+            <span class="material-symbols-outlined text-2xl">dump_truck</span>
+          </div>
+          <div>
+            <h5 class="text-xs font-bold text-primary">Truk Colt Diesel (AG 8492 UT)</h5>
+            <p class="text-[11px] text-text-muted">Sopir: <strong>Budi Santoso</strong> • PT Sentosa Teraso</p>
+          </div>
+        </div>
+        <span id="eta-badge" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-300">ETA: 18 Menit</span>
+      </div>
+
+      <!-- PROGRESS STEPS -->
+      <div class="relative flex items-center justify-between pt-2 px-1">
+        <div class="absolute top-4 left-6 right-6 h-0.5 bg-slate-200 z-0"></div>
+        <div id="progress-bar-track" class="absolute top-4 left-6 w-1/2 h-0.5 bg-secondary z-0 transition-all duration-500"></div>
+
+        <div class="flex flex-col items-center gap-1 z-10">
+          <div class="w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold shadow-sm">✓</div>
+          <span class="text-[10px] font-bold text-primary">Dipesan</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 z-10">
+          <div id="step-2-circle" class="w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-emerald-100">2</div>
+          <span class="text-[10px] font-bold text-secondary">Menuju Lokasi</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 z-10">
+          <div id="step-3-circle" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shadow-sm">3</div>
+          <span class="text-[10px] font-medium text-text-muted">Timbang</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 z-10">
+          <div id="step-4-circle" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shadow-sm">4</div>
+          <span class="text-[10px] font-medium text-text-muted">Selesai</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-2">
+        <button onclick="simulasikanMajukanTruk()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-primary text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">fast_forward</span>
+          <span>Simulasi Majukan Status Truk</span>
+        </button>
+        <button onclick="hubungiSopirWA()" class="p-2 bg-emerald-50 text-secondary hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors" title="Hubungi Sopir">
+          <span class="material-symbols-outlined text-lg">call</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL: BUAT PASPOR DIGITAL BARU (FR-12 & FR-13) ================= -->
+  <div id="modal-buat-paspor" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gold/15 text-gold flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">verified</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Penerbitan Paspor Digital Produk</h3>
+            <p class="text-[11px] text-text-muted">Karya Marmer Tersertifikasi Geologis (FR-12)</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-buat-paspor')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2.5 text-xs">
+        <div>
+          <label class="font-bold text-text-muted">Nama Karya / Produk Jadi</label>
+          <input id="input-passport-name" type="text" value="Wastafel Marmer Trosobo Natural Edge" class="w-full mt-1 p-2.5 bg-slate-50 border border-border-subtle rounded-xl font-bold text-primary focus:bg-white focus:border-secondary"/>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-text-muted">Kategori</label>
+            <select id="input-passport-cat" class="w-full mt-1 p-2.5 bg-slate-50 border border-border-subtle rounded-xl text-primary font-medium">
+              <option value="Sanitari & Kamar Mandi Mewah">Sanitari Mewah</option>
+              <option value="Furniture & Dekorasi Interior">Furniture Interior</option>
+              <option value="Kriya Seni & Patung Estetik">Kriya Seni</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-text-muted">Bobot Netto (kg)</label>
+            <input id="input-passport-weight" type="number" value="42" class="w-full mt-1 p-2.5 bg-slate-50 border border-border-subtle rounded-xl font-bold text-primary font-tabular"/>
+          </div>
+        </div>
+        <div>
+          <label class="font-bold text-text-muted">Asal Bongkahan Kuari Marmer Tambang</label>
+          <select id="input-passport-quarry" class="w-full mt-1 p-2.5 bg-slate-50 border border-border-subtle rounded-xl text-primary font-medium">
+            <option value="q1111111-qqqq-qqqq-qqqq-qqqqqqqqqqqq">Kuari Marmer Selatan Besole Blok 4 (IUP: 540/328/IUP-OP)</option>
+            <option value="q2222222-qqqq-qqqq-qqqq-qqqqqqqqqqqq">Kuari Gamping Campurdarat Sektor Barat (SIPB: 540/112/SIPB)</option>
+          </select>
+        </div>
+
+        <!-- Zero-Waste Circular Contribution (FR-13) -->
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-secondary">Kontribusi Sirkular Zero-Waste (FR-13):</span>
+            <span class="font-extrabold text-secondary">100% Terserap</span>
+          </div>
+          <p class="text-[10px] text-text-muted mt-1 leading-snug">
+            Sistem memverifikasi bahwa 100% residu bubut karya ini telah diserap oleh mitra pabrik teraso & paving SI-MUKTI.
+          </p>
+        </div>
+      </div>
+
+      <button id="btn-submit-passport" onclick="prosesBuatPaspor()" class="tap-target w-full bg-primary hover:bg-navy text-white font-bold text-sm rounded-xl py-3 flex items-center justify-center gap-2 shadow-md">
+        <span class="material-symbols-outlined text-lg">qr_code_2</span>
+        <span>Terbitkan Segel Resmi & Paspor QR</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: TARIK DANA BANK JATIM (FR-06) ================= -->
+  <div id="modal-tarik-dana" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-secondary flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">account_balance</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Tarik Dana MUKTI-Pay</h3>
+            <p class="text-[11px] text-text-muted">Pencairan langsung ke rekening bank pengrajin</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-tarik-dana')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="bg-slate-50 p-3.5 rounded-xl border border-border-subtle flex justify-between items-center">
+        <div>
+          <span class="text-[11px] text-text-muted">Saldo Tersedia:</span>
+          <p id="modal-balance-text" class="text-xl font-extrabold text-primary font-tabular">Memuat...</p>
+        </div>
+        <span class="px-2 py-1 bg-emerald-100 text-secondary text-[10px] font-bold rounded-md">Bebas Potongan</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-text-muted">Rekening Bank Tujuan</label>
+        <div class="p-3 bg-white border-2 border-primary/20 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center">JATIM</div>
+            <div>
+              <p class="text-xs font-bold text-primary">Bank Jatim Cabang Tulungagung</p>
+              <p class="text-[11px] font-mono text-text-muted">0182-3901-23 • SUPARDI</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-secondary text-xl">check_circle</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-text-muted">Nominal Penarikan (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-3 font-bold text-primary text-sm">Rp</span>
+          <input id="input-nominal-tarik" type="number" value="500000" class="w-full pl-10 pr-3 py-2.5 text-lg font-bold text-primary font-tabular bg-slate-50 border border-border-subtle rounded-xl focus:outline-none focus:border-secondary focus:bg-white"/>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="setNominal(250000)" class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-[11px] font-bold rounded-lg text-primary">Rp 250rb</button>
+          <button onclick="setNominal(500000)" class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-[11px] font-bold rounded-lg text-primary">Rp 500rb</button>
+          <button onclick="setNominal(1000000)" class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-[11px] font-bold rounded-lg text-primary">Rp 1 Juta</button>
+          <button onclick="setNominalAll()" class="flex-1 py-1.5 bg-emerald-100 text-secondary hover:bg-emerald-200 text-[11px] font-bold rounded-lg">Semua</button>
+        </div>
+      </div>
+
+      <button id="btn-proses-tarik" onclick="prosesTarikDana()" class="tap-target w-full bg-secondary hover:bg-emerald-800 text-white font-bold text-sm rounded-xl py-3 flex items-center justify-center gap-2 shadow-md">
+        <span class="material-symbols-outlined text-lg">send</span>
+        <span>Konfirmasi Pencairan ke Bank Jatim</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SETOR RESIDU & AI VOLUMETRIK (FR-03 & FR-04) ================= -->
+  <div id="modal-setor-limbah" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">camera_enhance</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Pencatatan Residu Limbah</h3>
+            <p class="text-[11px] text-text-muted">Model AI Kontur 3D Tulungagung Karst</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-setor-limbah')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-text-muted">Pilih Kategori Residu</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="cursor-pointer border-2 border-secondary bg-emerald-50/60 p-3 rounded-xl flex items-center gap-2">
+            <input type="radio" name="waste-type" value="sludge_lumpur" checked class="text-secondary focus:ring-secondary"/>
+            <div>
+              <p class="text-xs font-bold text-primary">Lumpur Sludge</p>
+              <p class="text-[10px] text-text-muted">Tarif: Rp 150rb / Ton</p>
+            </div>
+          </label>
+          <label class="cursor-pointer border-2 border-border-subtle bg-slate-50 p-3 rounded-xl flex items-center gap-2">
+            <input type="radio" name="waste-type" value="afur_kasar" class="text-secondary focus:ring-secondary"/>
+            <div>
+              <p class="text-xs font-bold text-primary">Bongkahan Afur</p>
+              <p class="text-[10px] text-text-muted">Tarif: Rp 120rb / Ton</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- AI CAMERA VIEWFINDER (FR-04) -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold text-text-muted">Kamera Deteksi Kontur 3D AI</label>
+          <span class="text-[10px] font-bold text-secondary flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            Model: Tulungagung-Karst-Mesh v2.1
+          </span>
+        </div>
+
+        <div class="relative w-full h-52 bg-slate-900 rounded-2xl overflow-hidden border-2 border-primary card-shadow flex items-center justify-center">
+          <img class="w-full h-full object-cover opacity-75" alt="Tumpukan Limbah" src="https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?auto=format&fit=crop&w=600&q=80"/>
+          <div class="absolute inset-4 border border-dashed border-emerald-400 rounded-xl pointer-events-none"></div>
+          <div class="absolute inset-x-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent scanner-line pointer-events-none"></div>
+
+          <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="60,140 120,60 260,70 320,150 200,180" fill="rgba(16, 185, 129, 0.25)" stroke="#10B981" stroke-width="2" stroke-dasharray="4,2"/>
+          </svg>
+
+          <div class="absolute bottom-3 left-3 right-3 bg-black/80 backdrop-blur-md p-2 rounded-xl border border-emerald-500/50 flex items-center justify-between text-white text-xs">
+            <div>
+              <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Hasil Audit AI Volumetrik</div>
+              <div class="font-extrabold text-sm font-tabular">2.4 m³ <span class="text-slate-300 font-normal">➔</span> ~3.8 Ton</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-slate-300">Akurasi: <strong>98.2%</strong></div>
+              <div class="text-emerald-400 font-extrabold font-tabular">Rp 570.000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-3 rounded-xl border border-border-subtle flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">location_on</span>
+          <div>
+            <p class="font-bold text-primary">Koordinat GNSS Bengkel Terekam</p>
+            <p class="text-[11px] font-mono text-text-muted">Lat: -8.1633, Lng: 111.8594 (Akurasi &lt; 2m)</p>
+          </div>
+        </div>
+        <span class="px-2 py-0.5 bg-emerald-100 text-secondary text-[10px] font-bold rounded">Tervalidasi</span>
+      </div>
+
+      <button onclick="simulasikanSetorLimbah()" class="tap-target w-full bg-primary hover:bg-navy text-white font-bold text-sm rounded-xl py-3 flex items-center justify-center gap-2 shadow-md">
+        <span class="material-symbols-outlined text-lg">publish</span>
+        <span>Publikasikan ke Web-GIS & Simpan ke DB</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: LACAK TRUK (FR-05) ================= -->
+  <div id="modal-lacak-truk" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">local_shipping</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Detail Armada Penjemput (FR-05)</h3>
+            <p class="text-[11px] text-text-muted">Truk Dump Offtaker PT Sentosa</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-lacak-truk')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="p-3.5 bg-slate-50 border border-border-subtle rounded-2xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-slate-300 overflow-hidden border-2 border-primary shrink-0">
+            <img class="w-full h-full object-cover" alt="Sopir Budi" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"/>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-primary">Budi Santoso</h4>
+            <p class="text-xs text-text-muted">Dump Truck Colt Diesel • <strong>AG 8492 UT</strong></p>
+            <p class="text-[11px] text-secondary font-semibold">Kapasitas Maksimal: 6.5 Ton</p>
+          </div>
+        </div>
+        <button onclick="hubungiSopirWA()" class="p-2.5 bg-secondary text-white rounded-xl shadow-sm hover:bg-emerald-800 transition-colors">
+          <span class="material-symbols-outlined text-xl">call</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Jalur Multi-Stop Hari Ini (Ritase #1)</span>
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-bold flex items-center justify-center">1</span>
+              <div>
+                <p class="font-bold text-primary">Kerajinan Onyx Lestari (Sawo)</p>
+                <p class="text-[10px] text-text-muted">Muat 2.85 Ton Afur</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-secondary">✓ Selesai Muat</span>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+              <div>
+                <p class="font-bold text-primary">Bengkel Al-Barokah (Anda)</p>
+                <p class="text-[10px] text-text-muted">Target: 3.5 Ton Sludge</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-amber-800 animate-pulse">Truk Menuju Lokasi</span>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-border-subtle flex items-center justify-between opacity-70">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 text-[10px] font-bold flex items-center justify-center">3</span>
+              <div>
+                <p class="font-bold text-primary">Pabrik PT Sentosa Teraso</p>
+                <p class="text-[10px] text-text-muted">Bongkar & Penimbangan Akhir</p>
+              </div>
+            </div>
+            <span class="text-[10px] text-text-muted">Tujuan Akhir</span>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="simulasikanMajukanTruk(); closeModal('modal-lacak-truk');" class="tap-target w-full bg-primary hover:bg-navy text-white font-bold text-sm rounded-xl py-3 flex items-center justify-center gap-2 shadow-md">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <span>Simulasikan Truk Tiba & Timbang</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: BUKU MUTASI (FR-02 & FR-06) ================= -->
+  <div id="modal-riwayat" class="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">receipt_long</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Buku Mutasi MUKTI-Pay</h3>
+            <p class="text-[11px] text-text-muted">Tersinkronisasi dengan tabel wallet_transactions</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-riwayat')" class="p-1 rounded-full text-text-muted hover:bg-slate-100">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div id="list-transaksi" class="space-y-2.5 text-xs">
+        <!-- Rendered by JS from DB -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl border border-white/20 flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+    <span id="toast-icon" class="material-symbols-outlined text-emerald-400 text-base">check_circle</span>
+    <span id="toast-msg">Pemberitahuan</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    let currentBalance = 1450000;
+    let currentTonnage = 8.5;
+    let truckStep = 2;
+
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num).toLocaleString('id-ID');
+    }
+
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = msg;
+      toastIcon.innerText = isSuccess ? 'check_circle' : 'info';
+      toastIcon.className = `material-symbols-outlined text-base ${isSuccess ? 'text-emerald-400' : 'text-amber-400'}`;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 3500);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function setNominal(amount) { document.getElementById('input-nominal-tarik').value = amount; }
+    function setNominalAll() { document.getElementById('input-nominal-tarik').value = currentBalance; }
+
+    async function loadDataFromDb() {
+      try {
+        const wallet = await window.simukti.getWallet('a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+        currentBalance = wallet.current_balance;
+        document.getElementById('display-balance').innerText = formatRupiah(currentBalance);
+        document.getElementById('modal-balance-text').innerText = formatRupiah(currentBalance);
+
+        // Render Riwayat Mutasi dari Database
+        const list = document.getElementById('list-transaksi');
+        list.innerHTML = '';
+        (wallet.transactions || []).forEach(tx => {
+          const isKredit = tx.transaction_type === 'kredit_valorisasi';
+          const item = document.createElement('div');
+          item.className = `p-3 ${isKredit ? 'bg-slate-50' : 'bg-red-50/60'} border border-border-subtle rounded-xl flex items-center justify-between`;
+          item.innerHTML = `
+            <div>
+              <p class="font-bold ${isKredit ? 'text-primary' : 'text-red-600'}">${tx.description}</p>
+              <p class="text-[10px] text-text-muted font-mono">${tx.transaction_code} • ${tx.created_at}</p>
+            </div>
+            <span class="text-sm font-extrabold ${isKredit ? 'text-secondary' : 'text-red-600'} font-tabular">
+              ${isKredit ? '+' : '-'}${formatRupiah(tx.amount)}
+            </span>
+          `;
+          list.appendChild(item);
+        });
+
+      } catch (e) {
+        console.error('Gagal memuat dompet:', e);
+      }
+    }
+
+    async function prosesTarikDana() {
+      const nominal = parseInt(document.getElementById('input-nominal-tarik').value);
+      if (isNaN(nominal) || nominal <= 0) {
+        showToast('Masukkan nominal penarikan yang valid!', false);
+        return;
+      }
+
+      const btn = document.getElementById('btn-proses-tarik');
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-lg">sync</span><span>Memproses ke Bank Jatim...</span>`;
+      btn.disabled = true;
+
+      try {
+        const res = await window.simukti.withdraw(nominal);
+        currentBalance = res.new_balance;
+        document.getElementById('display-balance').innerText = formatRupiah(currentBalance);
+        document.getElementById('modal-balance-text').innerText = formatRupiah(currentBalance);
+        closeModal('modal-tarik-dana');
+        showToast(res.message);
+        await loadDataFromDb();
+      } catch (err) {
+        showToast(err.message, false);
+      } finally {
+        btn.innerHTML = `<span class="material-symbols-outlined text-lg">send</span><span>Konfirmasi Pencairan ke Bank Jatim</span>`;
+        btn.disabled = false;
+      }
+    }
+
+    async function simulasikanSetorLimbah() {
+      const wasteType = document.querySelector('input[name="waste-type"]:checked').value;
+      const res = await window.simukti.createWasteLog({
+        workshop_id: 'a1111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        waste_type: wasteType,
+        estimated_volume_m3: 2.4,
+        estimated_tonnage: 3.8
+      });
+      closeModal('modal-setor-limbah');
+      showToast(res.message);
+    }
+
+    async function prosesBuatPaspor() {
+      const name = document.getElementById('input-passport-name').value;
+      const cat = document.getElementById('input-passport-cat').value;
+      const weight = parseFloat(document.getElementById('input-passport-weight').value);
+      const quarry = document.getElementById('input-passport-quarry').value;
+
+      const btn = document.getElementById('btn-submit-passport');
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-lg">sync</span><span>Menerbitkan Paspor Digital...</span>`;
+      btn.disabled = true;
+
+      try {
+        const res = await window.simukti.createPassport({
+          product_name: name,
+          product_category: cat,
+          weight_kg: weight,
+          quarry_block_id: quarry
+        });
+        closeModal('modal-buat-paspor');
+        showToast(`Paspor '${name}' berhasil diterbitkan dengan segel ${res.authenticity_seal_number}!`);
+        document.getElementById('display-passports').innerText = "35 Produk";
+      } catch (err) {
+        showToast("Gagal menerbitkan paspor: " + err.message, false);
+      } finally {
+        btn.innerHTML = `<span class="material-symbols-outlined text-lg">qr_code_2</span><span>Terbitkan Segel Resmi & Paspor QR</span>`;
+        btn.disabled = false;
+      }
+    }
+
+    async function simulasikanMajukanTruk() {
+      truckStep++;
+      const eta = document.getElementById('eta-badge');
+      const bar = document.getElementById('progress-bar-track');
+      const s3 = document.getElementById('step-3-circle');
+      const s4 = document.getElementById('step-4-circle');
+
+      if (truckStep === 3) {
+        eta.className = "px-2 py-0.5 rounded-full bg-emerald-100 text-secondary text-[11px] font-bold border border-emerald-300";
+        eta.innerText = "Truk Tiba di Bengkel";
+        bar.style.width = "75%";
+        s3.className = "w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold shadow-sm ring-4 ring-emerald-100";
+        showToast('Truk AG 8492 UT tiba di Bengkel Al-Barokah. Sedang menimbang muatan.');
+      } else if (truckStep >= 4) {
+        eta.className = "px-2 py-0.5 rounded-full bg-blue-100 text-primary text-[11px] font-bold border border-blue-300";
+        eta.innerText = "Muat Selesai (3.5 Ton)";
+        bar.style.width = "100%";
+        s4.className = "w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold shadow-sm";
+
+        const res = await window.simukti.advancePickupStatus();
+        await loadDataFromDb();
+        showToast(res.message);
+        truckStep = 4;
+      }
+    }
+
+    function hubungiSopirWA() {
+      showToast('Menghubungkan ke WhatsApp Sopir Budi Santoso (+62 821-4321-9876)...');
+    }
+
+    window.onload = loadDataFromDb;
+  </script>
+</body>
+</html>
