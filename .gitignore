@@ -47,3 +47,6 @@ __pycache__/
 ~$*.docx
 *.tmp
 *.log
+
+.vercel
+.env*
