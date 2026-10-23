@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="quarryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00236F" />
+      <stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#006C49" />
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Shield -->
+  <rect width="512" height="512" rx="112" fill="url(#quarryGrad)" />
+  <!-- Inner Marble Slab Graphic -->
+  <path d="M128 176 L256 104 L384 176 L384 336 L256 408 L128 336 Z" fill="#FFFFFF" fill-opacity="0.12" stroke="#DCE1FF" stroke-width="8" stroke-linejoin="round" />
+  <!-- Circular Eco Leaf / Recycling Symbol -->
+  <path d="M256 160 C320 160 360 210 360 270 C360 330 310 360 256 360 C230 360 190 340 180 300 C170 260 200 210 256 160 Z" fill="url(#emeraldGrad)" />
+  <path d="M220 270 L256 306 L310 240" fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Gold Seal Star Accent -->
+  <circle cx="376" cy="136" r="32" fill="#D97706" stroke="#FFFFFF" stroke-width="6" />
+</svg>
