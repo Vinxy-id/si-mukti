@@ -68,7 +68,7 @@ export const AppBottomNav: React.FC = () => {
     if (pathname?.startsWith('/pengrajin/wallet')) return 1;
     if (pathname?.startsWith('/pengrajin/waste/new')) return 2;
     if (pathname === '/spasial') return 3;
-    if (pathname?.startsWith('/pengrajin/passports')) return 4;
+    if (pathname?.startsWith('/pengrajin/passports') || pathname?.startsWith('/verify')) return 4;
     return -1;
   };
 
@@ -94,7 +94,8 @@ export const AppBottomNav: React.FC = () => {
           const isActive =
             pathname === item.href ||
             (item.href !== '/pengrajin/dashboard' &&
-              pathname?.startsWith(item.href));
+              pathname?.startsWith(item.href)) ||
+            (item.href === '/pengrajin/passports' && pathname?.startsWith('/verify'));
 
           if (item.highlight) {
             return (

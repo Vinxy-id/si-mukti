@@ -52,8 +52,10 @@ import DispatchModal from '@/components/gis/DispatchModal';
 import ManifestPrintModal from '@/components/gis/ManifestPrintModal';
 import { RightCommandHUD, LeftCommandHUD } from '@/components/gis/CommandCenterHUD';
 import { AppBottomNav } from '@/components/layout/AppBottomNav';
+import { AppSidebar } from '@/components/layout/AppSidebar';
 import { GlobalModuleNavbar } from '@/components/layout/GlobalModuleNavbar';
 import { formatRupiah } from '@/lib/utils';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 // Dynamic import LeafletMap untuk mencegah error SSR
 const LeafletMap = dynamic(() => import('@/components/gis/LeafletMap'), {
@@ -82,6 +84,18 @@ export default function SpatialGisPage() {
   const [strictSniFilter, setStrictSniFilter] = useState<boolean>(false);
   const [isMultiStopRouteActive, setIsMultiStopRouteActive] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Status Kolapsibel Sidebar Navigasi Desktop
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => !prev);
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('resize'));
+      }
+    }, 350);
+  };
 
   // Tab switcher khusus untuk Android / Mobile (< 1024px)
   const [mobileTab, setMobileTab] = useState<'map' | 'filters' | 'analytics'>('map');
@@ -440,34 +454,58 @@ export default function SpatialGisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F7FF] text-slate-800 flex flex-col font-sans relative overflow-x-hidden pb-20 md:pb-6">
+    <div className="min-h-screen bg-[#F0F7FF] text-slate-800 flex flex-col md:flex-row font-sans relative overflow-x-hidden">
       {/* Background High-Tech Cyan Ambiance Grids */}
       <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
       <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-sky-200/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-cyan-200/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-5 left-4 right-4 max-w-md mx-auto z-50 bg-[#10B981] text-white px-4 py-3 rounded-2xl shadow-level-3 flex items-center gap-3 animate-fade-in">
-          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-          <p className="text-xs font-semibold leading-snug">{toastMessage}</p>
-        </div>
-      )}
+      {/* Sidebar Navigasi Persisten Terpadu Desktop */}
+      <AppSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleSidebar}
+        showCollapseToggle={true}
+      />
 
-      {/* ========================================================================= */}
-      {/* 1. TOP COMMAND BAR (Responsif untuk Android dan Windows)                  */}
-      {/* ========================================================================= */}
-      <header className="relative z-40 bg-white/90 backdrop-blur-md border-b border-sky-100 shadow-xs px-3 sm:px-6 py-2.5 sm:py-3">
-        <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
-          {/* Logo & Judul Sistem */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
-              href="/"
-              className="p-1.5 sm:p-2 rounded-xl hover:bg-sky-50 text-slate-600 transition-colors shrink-0"
-              title="Kembali ke Beranda"
-            >
-              <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5" />
-            </Link>
+      {/* Kolom Kerja Utama Spasial Web-GIS */}
+      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-6 relative z-10">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed top-5 left-4 right-4 max-w-md mx-auto z-50 bg-[#10B981] text-white px-4 py-3 rounded-2xl shadow-level-3 flex items-center gap-3 animate-fade-in">
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+            <p className="text-xs font-semibold leading-snug">{toastMessage}</p>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 1. TOP COMMAND BAR (Responsif untuk Android dan Windows)                  */}
+        {/* ========================================================================= */}
+        <header className="relative z-40 bg-white/90 backdrop-blur-md border-b border-sky-100 shadow-xs px-3 sm:px-6 py-2.5 sm:py-3">
+          <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            {/* Logo & Judul Sistem */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Tombol Kolaps/Buka Sidebar Navigasi (Desktop) */}
+              <button
+                type="button"
+                onClick={handleToggleSidebar}
+                className="hidden md:flex p-1.5 sm:p-2 rounded-xl text-slate-500 hover:text-[#00236F] hover:bg-sky-50 transition-colors shrink-0"
+                title={isSidebarCollapsed ? 'Buka Sidebar Navigasi Penuh' : 'Ciutkan Sidebar Navigasi (Layar Peta Penuh)'}
+                aria-label={isSidebarCollapsed ? 'Buka Sidebar Navigasi' : 'Ciutkan Sidebar Navigasi'}
+              >
+                {isSidebarCollapsed ? (
+                  <PanelLeftOpen className="w-5 h-5 text-[#00236F]" />
+                ) : (
+                  <PanelLeftClose className="w-5 h-5" />
+                )}
+              </button>
+
+              <Link
+                href="/"
+                className="p-1.5 sm:p-2 rounded-xl hover:bg-sky-50 text-slate-600 transition-colors shrink-0 md:hidden"
+                title="Kembali ke Beranda"
+              >
+                <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5" />
+              </Link>
 
             <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0 group">
               <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-2xl bg-gradient-to-br from-[#00236F] to-[#1E3A8A] flex items-center justify-center text-white shadow-sm shadow-blue-900/20 shrink-0 group-hover:scale-105 transition-transform">
@@ -820,6 +858,7 @@ export default function SpatialGisPage() {
 
       {/* Bottom Nav untuk Gawai Mobile */}
       <AppBottomNav />
+      </div>
     </div>
   );
 }

@@ -31,6 +31,8 @@ import { formatRupiah } from '@/lib/utils';
 import { BigActionButton } from '@/components/ui/BigActionButton';
 import { useSystemStore } from '@/lib/system-store';
 import { GlobalModuleNavbar } from '@/components/layout/GlobalModuleNavbar';
+import { AppSidebar } from '@/components/layout/AppSidebar';
+import { AppBottomNav } from '@/components/layout/AppBottomNav';
 
 interface TraceabilityStep {
   stepNumber: number;
@@ -51,6 +53,7 @@ export default function PublicVerifyPassportPage() {
 
   const [copiedLink, setCopiedLink] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isConsumerView, setIsConsumerView] = useState(false);
 
   // Data Spesifikasi Paspor Marmer Terverifikasi
   const defaultPassportData = {
@@ -157,50 +160,98 @@ export default function PublicVerifyPassportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-canvas text-text-primary antialiased pb-16">
-      {/* Top Header Terpadu Sesuai Tema Light Glassmorphism SI-MUKTI */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/90 py-3 px-4 sm:px-6 lg:px-8 shadow-xs sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {/* Sisi Kiri: Tombol Beranda & Identitas Lembaga */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <Link
-              href="/"
-              className="p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-[#00236F] transition-colors shrink-0"
-              title="Kembali ke Beranda"
+    <div className="min-h-screen bg-surface-canvas text-text-primary antialiased flex flex-col md:flex-row">
+      {/* Sidebar Persisten Terpadu (Tampil saat bukan mode konsumen) */}
+      {!isConsumerView && (
+        <AppSidebar showCollapseToggle={false} />
+      )}
+
+      {/* Kolom Konten Utama MUKTI-Trace */}
+      <div className="flex-1 flex flex-col min-w-0 pb-16">
+        {/* Banner Mode Pratinjau Publik jika diaktifkan */}
+        {isConsumerView && (
+          <div className="bg-gradient-to-r from-[#00236F] via-[#1E3A8A] to-[#0A192F] text-white px-4 py-2.5 text-xs font-medium flex items-center justify-between sticky top-0 z-40 shadow-sm print:hidden">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                <strong>Pratinjau Mode Publik (Konsumen):</strong> Mensimulasikan tampilan pembeli luar kota saat memindai kode QR fisik pada produk marmer.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsConsumerView(false)}
+              className="bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1 rounded-lg text-xs transition-colors shrink-0 ml-2"
             >
-              <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5" />
-            </Link>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#00236F] to-[#1E3A8A] flex items-center justify-center text-amber-300 font-bold shrink-0 shadow-sm">
-              <Landmark className="w-4 sm:w-5 h-4 sm:h-5 text-amber-300" />
-            </div>
-            <div className="flex flex-col shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-black tracking-tight text-[#00236F] whitespace-nowrap">
-                  SI-MUKTI
-                </span>
-                <span className="text-[9px] sm:text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-                  MUKTI-Trace
-                </span>
+              Kembali ke Portal
+            </button>
+          </div>
+        )}
+
+        {/* Top Header Terpadu Sesuai Tema Light Glassmorphism SI-MUKTI */}
+        <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/90 py-3 px-4 sm:px-6 lg:px-8 shadow-xs sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            {/* Sisi Kiri: Tombol Beranda & Identitas Lembaga */}
+            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+              <Link
+                href="/"
+                className="p-1.5 sm:p-2 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-[#00236F] transition-colors shrink-0"
+                title="Kembali ke Beranda"
+              >
+                <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5" />
+              </Link>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#00236F] to-[#1E3A8A] flex items-center justify-center text-amber-300 font-bold shrink-0 shadow-sm">
+                <Landmark className="w-4 sm:w-5 h-4 sm:h-5 text-amber-300" />
               </div>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold whitespace-nowrap hidden sm:block">
-                Paspor Digital Marmer &bull; Pemkab Tulungagung
-              </p>
+              <div className="flex flex-col shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-base sm:text-lg font-black tracking-tight text-[#00236F] whitespace-nowrap">
+                    SI-MUKTI
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-black uppercase bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
+                    MUKTI-Trace
+                  </span>
+                </div>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold whitespace-nowrap hidden sm:block">
+                  Paspor Digital Marmer &bull; Pemkab Tulungagung
+                </p>
+              </div>
+            </div>
+
+            {/* Sisi Tengah: Navigasi Modul Terpadu Global Desktop (Varian Light Selaras) */}
+            <GlobalModuleNavbar variant="light" className="hidden lg:flex shrink-0" />
+
+            {/* Sisi Kanan: Aksi Pratinjau & Lencana Verifikasi SNI */}
+            <div className="flex items-center gap-2 shrink-0">
+              {!isConsumerView ? (
+                <button
+                  type="button"
+                  onClick={() => setIsConsumerView(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 bg-sky-50 hover:bg-sky-100 text-[#00236F] border border-sky-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs"
+                  title="Pratinjau tampilan konsumen luar kota tanpa sidebar"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-[#0284C7]" />
+                  <span>Mode Publik</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsConsumerView(false)}
+                  className="hidden sm:inline-flex items-center gap-1.5 bg-[#00236F] hover:bg-[#1E3A8A] text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs"
+                  title="Kembali ke tampilan portal terpadu dengan sidebar"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Mode Portal</span>
+                </button>
+              )}
+
+              <div className="flex items-center gap-1.5 bg-[#ECFDF5] text-[#006C49] border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs">
+                <ShieldCheck className="w-4 h-4 text-[#10B981]" />
+                <span className="hidden sm:inline">Terverifikasi SNI</span>
+                <span className="sm:hidden">SNI</span>
+              </div>
             </div>
           </div>
-
-          {/* Sisi Tengah: Navigasi Modul Terpadu Global Desktop (Varian Light Selaras) */}
-          <GlobalModuleNavbar variant="light" className="hidden lg:flex shrink-0" />
-
-          {/* Sisi Kanan: Lencana Verifikasi SNI */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 bg-[#ECFDF5] text-[#006C49] border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs">
-              <ShieldCheck className="w-4 h-4 text-[#10B981]" />
-              <span className="hidden sm:inline">Terverifikasi SNI</span>
-              <span className="sm:hidden">SNI</span>
-            </div>
-          </div>
-        </div>
-      </header>
+        </header>
 
       {/* Konten Utama Responsif (Bebas Blank Space pada Layar Windows / Desktop) */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -545,6 +596,10 @@ export default function PublicVerifyPassportPage() {
           </p>
         </footer>
       </main>
+
+      {/* Navigasi Mobile Bawah */}
+      <AppBottomNav />
+      </div>
     </div>
   );
 }
